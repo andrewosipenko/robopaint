@@ -60,6 +60,7 @@ public class ContinuousAreaImageMerger implements ImageMerger {
 
     private void fill(IndexedLineImage source2, IndexedLineImage target, int areaSize, int start2,
                       Set<IndexedLine> mergedLines){
+        int skipped = 0;
         for(int targetIndex = 0, source2Index = 0; targetIndex < target.getLineCount(); ) {
             if(targetIndex == start2) {
                 targetIndex = start2 + areaSize;
@@ -67,10 +68,19 @@ public class ContinuousAreaImageMerger implements ImageMerger {
             else {
                 int start = source2.getStart(source2Index);
                 int end = source2.getEnd(source2Index);
-                IndexedLine indexedLine = start >= end ? new IndexedLine(start, end) : new IndexedLine(end, start);
-                if (!mergedLines.contains(indexedLine)){
+                if (skipped == mergedLines.size()) {
                     target.set(targetIndex, start, end);
                     targetIndex++;
+                }
+                else {
+                    IndexedLine indexedLine = start >= end ? new IndexedLine(start, end) : new IndexedLine(end, start);
+                    if (mergedLines.contains(indexedLine)) {
+                        skipped++;
+                    }
+                    else {
+                        target.set(targetIndex, start, end);
+                        targetIndex++;
+                    }
                 }
                 source2Index++;
             }

@@ -36,30 +36,33 @@ public class ContinuousAreaImageMerger implements ImageMerger {
     }
     void mergeInternally(IndexedLineImage source1, IndexedLineImage source2, IndexedLineImage target,
                                    int areaSize, int start1, int start2) {
-        Set<IndexedLine> mergedLines = new HashSet<>(areaSize);
+        int[] mergedStarts = new int[areaSize];
+        int[] mergedEnds = new int[areaSize];
 
-        copy(source1, target, areaSize, start1, start2, mergedLines);
+        copy(source1, target, areaSize, start1, start2, mergedStarts, mergedEnds);
 
-        fill(source2, target, areaSize, start2, mergedLines);
+        fill(source2, target, areaSize, start2, mergedStarts, mergedEnds);
     }
 
     private void copy(IndexedLineImage source1, IndexedLineImage target, int areaSize, int start1, int start2,
-                      Set<IndexedLine> mergedLines) {
+                      int[] mergedStarts, int[] mergedEnds) {
         for(int i = 0; i < areaSize; i++){
             int start = source1.getStart(start1 + i);
             int end = source1.getEnd(start1 + i);
             target.set(start2 + i, start, end);
             if(start >= end) {
-                mergedLines.add(new IndexedLine(start, end));
+                mergedStarts[i] = start;
+                mergedEnds[i] = end;
             }
             else {
-                mergedLines.add(new IndexedLine(end, start));
+                mergedStarts[i] = end;
+                mergedEnds[i] = start;
             }
         }
     }
 
     private void fill(IndexedLineImage source2, IndexedLineImage target, int areaSize, int start2,
-                      Set<IndexedLine> mergedLines){
+                      int[] mergedStarts, int[] mergedEnds){
         int skipped = 0;
         for(int targetIndex = 0, source2Index = 0; targetIndex < target.getLineCount(); ) {
             if(targetIndex == start2) {
@@ -68,13 +71,12 @@ public class ContinuousAreaImageMerger implements ImageMerger {
             else {
                 int start = source2.getStart(source2Index);
                 int end = source2.getEnd(source2Index);
-                if (skipped == mergedLines.size()) {
+                if (skipped == mergedStarts.length) {
                     target.set(targetIndex, start, end);
                     targetIndex++;
                 }
                 else {
-                    IndexedLine indexedLine = start >= end ? new IndexedLine(start, end) : new IndexedLine(end, start);
-                    if (mergedLines.contains(indexedLine)) {
+                    if (contains(mergedStarts, mergedEnds, start, end)) {
                         skipped++;
                     }
                     else {
@@ -85,5 +87,22 @@ public class ContinuousAreaImageMerger implements ImageMerger {
                 source2Index++;
             }
         }
+    }
+    private boolean contains(int[] mergedStarts, int[] mergedEnds, int start, int end){
+        int start1, end1;
+        if(start >= end) {
+            start1 = start;
+            end1 = end;
+        }
+        else {
+            start1 = end;
+            end1 = start;
+        }
+        for(int i = 0; i < mergedStarts.length; i++){
+            if(mergedStarts[i] == start1 && mergedEnds[i] == end1) {
+                return true;
+            }
+        }
+        return false;
     }
 }

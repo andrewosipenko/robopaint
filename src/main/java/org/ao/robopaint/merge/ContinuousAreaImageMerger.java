@@ -4,10 +4,7 @@ import org.ao.robopaint.image.indexed.IndexedLine;
 import org.ao.robopaint.image.indexed.IndexedLineImage;
 import org.ao.robopaint.norm.NormCalculator;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class ContinuousAreaImageMerger implements ImageMerger {
@@ -40,7 +37,7 @@ public class ContinuousAreaImageMerger implements ImageMerger {
     void mergeInternally(IndexedLineImage source1, IndexedLineImage source2, IndexedLineImage target,
                                    int areaSize, int start1, int start2) {
         int pointCount = source1.getPointIndex().getPointCount();
-        boolean[][] mergedLines = new boolean[pointCount][pointCount];
+        Set<IndexedLine> mergedLines = new HashSet<>();
         boolean[] targetDefined = new boolean[pointCount];
 
         copy(source1, target, areaSize, start1, start2, mergedLines, targetDefined);
@@ -51,36 +48,37 @@ public class ContinuousAreaImageMerger implements ImageMerger {
     }
 
     private void copy(IndexedLineImage source1, IndexedLineImage target, int areaSize, int start1, int start2,
-                      boolean[][] mergedLines, boolean[] targetDefined) {
+                      Set<IndexedLine> mergedLines, boolean[] targetDefined) {
         for(int i = 0; i < areaSize; i++){
             int start = source1.getStart(start1 + i);
             int end = source1.getEnd(start1 + i);
             target.set(start2 + i, start, end);
-            mergedLines[start][end] = true;
+            mergedLines.add(new IndexedLine(start, end));
             targetDefined[start2 + i] = true;
         }
     }
 
-    private List<IndexedLine> getSkippedLines(IndexedLineImage source2, int areaSize, int start2, boolean[][] mergedLines){
+    private List<IndexedLine> getSkippedLines(IndexedLineImage source2, int areaSize, int start2, Set<IndexedLine> mergedLines){
         List<IndexedLine> skippedLines = new ArrayList<>();
         for(int i = 0; i < areaSize; i++){
             int start = source2.getStart(start2 + i);
             int end = source2.getEnd(start2 + i);
 
-            if(!mergedLines[start][end] && !mergedLines[end][start]){
-                skippedLines.add(new IndexedLine(start, end));
+            IndexedLine indexedLine = new IndexedLine(start, end);
+            if(!mergedLines.contains(indexedLine) && !mergedLines.contains(new IndexedLine(end, start))){
+                skippedLines.add(indexedLine);
             }
         }
         return skippedLines;
     }
     private void fill(IndexedLineImage source2, IndexedLineImage target, List<IndexedLine> skippedLines,
-                      boolean[][] mergedLines, boolean[] targetDefined){
+                      Set<IndexedLine> mergedLines, boolean[] targetDefined){
         Iterator<IndexedLine> lineIterator = skippedLines.iterator();
         for(int i = 0; i < target.getLineCount(); i++) {
             if(!targetDefined[i]) {
                 int start = source2.getStart(i);
                 int end = source2.getEnd(i);
-                if (mergedLines[start][end] || mergedLines[end][start]){
+                if (mergedLines.contains(new IndexedLine(start, end)) || mergedLines.contains(new IndexedLine(end, start))){
                     IndexedLine indexedLine = lineIterator.next();
                     target.set(i, indexedLine.getStart(), indexedLine.getEnd());
                 }
@@ -92,6 +90,5 @@ public class ContinuousAreaImageMerger implements ImageMerger {
         if(lineIterator.hasNext()) {
             throw new IllegalArgumentException("One line was not processed still");
         }
-
     }
 }

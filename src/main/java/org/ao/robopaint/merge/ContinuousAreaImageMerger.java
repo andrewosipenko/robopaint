@@ -36,59 +36,44 @@ public class ContinuousAreaImageMerger implements ImageMerger {
     }
     void mergeInternally(IndexedLineImage source1, IndexedLineImage source2, IndexedLineImage target,
                                    int areaSize, int start1, int start2) {
-        int pointCount = source1.getPointIndex().getPointCount();
         Set<IndexedLine> mergedLines = new HashSet<>();
-        boolean[] targetDefined = new boolean[pointCount];
 
-        copy(source1, target, areaSize, start1, start2, mergedLines, targetDefined);
+        copy(source1, target, areaSize, start1, start2, mergedLines);
 
-        List<IndexedLine> skippedLines = getSkippedLines(source2, areaSize, start2, mergedLines);
-
-        fill(source2, target, skippedLines, mergedLines, targetDefined);
+        fill(source2, target, areaSize, start2, mergedLines);
     }
 
     private void copy(IndexedLineImage source1, IndexedLineImage target, int areaSize, int start1, int start2,
-                      Set<IndexedLine> mergedLines, boolean[] targetDefined) {
+                      Set<IndexedLine> mergedLines) {
         for(int i = 0; i < areaSize; i++){
             int start = source1.getStart(start1 + i);
             int end = source1.getEnd(start1 + i);
             target.set(start2 + i, start, end);
-            mergedLines.add(new IndexedLine(start, end));
-            targetDefined[start2 + i] = true;
+            if(start >= end) {
+                mergedLines.add(new IndexedLine(start, end));
+            }
+            else {
+                mergedLines.add(new IndexedLine(end, start));
+            }
         }
     }
 
-    private List<IndexedLine> getSkippedLines(IndexedLineImage source2, int areaSize, int start2, Set<IndexedLine> mergedLines){
-        List<IndexedLine> skippedLines = new ArrayList<>();
-        for(int i = 0; i < areaSize; i++){
-            int start = source2.getStart(start2 + i);
-            int end = source2.getEnd(start2 + i);
-
-            IndexedLine indexedLine = new IndexedLine(start, end);
-            if(!mergedLines.contains(indexedLine) && !mergedLines.contains(new IndexedLine(end, start))){
-                skippedLines.add(indexedLine);
+    private void fill(IndexedLineImage source2, IndexedLineImage target, int areaSize, int start2,
+                      Set<IndexedLine> mergedLines){
+        for(int targetIndex = 0, source2Index = 0; targetIndex < target.getLineCount(); ) {
+            if(targetIndex == start2) {
+                targetIndex = start2 + areaSize;
             }
-        }
-        return skippedLines;
-    }
-    private void fill(IndexedLineImage source2, IndexedLineImage target, List<IndexedLine> skippedLines,
-                      Set<IndexedLine> mergedLines, boolean[] targetDefined){
-        Iterator<IndexedLine> lineIterator = skippedLines.iterator();
-        for(int i = 0; i < target.getLineCount(); i++) {
-            if(!targetDefined[i]) {
-                int start = source2.getStart(i);
-                int end = source2.getEnd(i);
-                if (mergedLines.contains(new IndexedLine(start, end)) || mergedLines.contains(new IndexedLine(end, start))){
-                    IndexedLine indexedLine = lineIterator.next();
-                    target.set(i, indexedLine.getStart(), indexedLine.getEnd());
+            else {
+                int start = source2.getStart(source2Index);
+                int end = source2.getEnd(source2Index);
+                IndexedLine indexedLine = start >= end ? new IndexedLine(start, end) : new IndexedLine(end, start);
+                if (!mergedLines.contains(indexedLine)){
+                    target.set(targetIndex, start, end);
+                    targetIndex++;
                 }
-                else {
-                    target.set(i, start, end);
-                }
+                source2Index++;
             }
-        }
-        if(lineIterator.hasNext()) {
-            throw new IllegalArgumentException("One line was not processed still");
         }
     }
 }

@@ -170,11 +170,11 @@ public class ContinuousAreaImageMergerTest {
                     target,
                     400, 0, 500);
 
-            assertEquals(500, target.getStart(0));
-            assertEquals(501, target.getEnd(0));
+            assertEquals(400, target.getStart(0));
+            assertEquals(401, target.getEnd(0));
 
-            assertEquals(400, target.getStart(400));
-            assertEquals(401, target.getEnd(400));
+            assertEquals(800, target.getStart(400));
+            assertEquals(801, target.getEnd(400));
         });
     }
 

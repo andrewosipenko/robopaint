@@ -36,7 +36,7 @@ public class ContinuousAreaImageMerger implements ImageMerger {
     }
     void mergeInternally(IndexedLineImage source1, IndexedLineImage source2, IndexedLineImage target,
                                    int areaSize, int start1, int start2) {
-        Set<IndexedLine> mergedLines = new HashSet<>();
+        Set<IndexedLine> mergedLines = new HashSet<>(areaSize);
 
         copy(source1, target, areaSize, start1, start2, mergedLines);
 

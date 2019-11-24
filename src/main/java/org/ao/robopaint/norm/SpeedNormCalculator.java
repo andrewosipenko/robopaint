@@ -4,6 +4,8 @@ import org.ao.robopaint.image.Line;
 import org.ao.robopaint.image.LineImage;
 
 public class SpeedNormCalculator implements NormCalculator {
+    private static final double WHITESPACE_TO_LINE_GAP = 5;
+
     @Override
     public double calculate(LineImage lineImage) {
         int result = 0;
@@ -19,6 +21,9 @@ public class SpeedNormCalculator implements NormCalculator {
             Line line = lines[i];
 
             result += calculateNorm(previousLine.x2, previousLine.y2, line.x1, line.y1);
+            if (previousLine.x2 != line.x1 || previousLine.y2 != line.y1){
+                result += WHITESPACE_TO_LINE_GAP;
+            }
             result += calculateNorm(line.x1, line.y1, line.x2, line.y2);
         }
         return result;

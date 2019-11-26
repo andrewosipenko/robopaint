@@ -11,14 +11,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class SvgRainbowImageExporter extends AbstractRainbowImageExporter {
-    private static final int SCALE = 5;
+    private final int scale;
     private final Path dir;
     private final int width;
     private final int height;
 
     private final ThreadLocal<Writer> writer = new ThreadLocal<>();
 
-    public SvgRainbowImageExporter(Path dir, int width, int height) throws IOException {
+    public SvgRainbowImageExporter(Path dir, int width, int height, int scale) throws IOException {
         if (Files.isDirectory(dir)) {
             Files.list(dir).forEach(path -> {
                 try {
@@ -35,6 +35,7 @@ public class SvgRainbowImageExporter extends AbstractRainbowImageExporter {
         this.dir = dir;
         this.width = width;
         this.height = height;
+        this.scale = scale;
     }
 
     @Override
@@ -96,9 +97,9 @@ public class SvgRainbowImageExporter extends AbstractRainbowImageExporter {
                     writer.append("<p><img src='");
                     writer.append(fileName);
                     writer.append("' width='");
-                    writer.append(Integer.toString(SCALE * width));
+                    writer.append(Integer.toString(scale * width));
                     writer.append("' height='");
-                    writer.append(Integer.toString(SCALE * height));
+                    writer.append(Integer.toString(scale * height));
                     writer.append("'/>");
                     writer.append(fileName);
                     writer.append("</p>\n");

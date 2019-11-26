@@ -21,9 +21,9 @@ public class RandomBruteForceSpeedLineImageTransformer implements LineImageTrans
 
     public RandomBruteForceSpeedLineImageTransformer(int iterationCount, int width, int height) throws IOException {
         this.iterationCount = iterationCount;
-        this.populationSize = 50000;
+        this.populationSize = 1000;
 
-        lineImageExporter = new SvgRainbowImageExporter(Paths.get("debug-populations"), width, height);
+        lineImageExporter = new SvgRainbowImageExporter(Paths.get("debug-populations"), width, height, 1);
     }
 
     @Override

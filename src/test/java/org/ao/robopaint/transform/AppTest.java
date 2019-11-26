@@ -3,10 +3,18 @@ package org.ao.robopaint.transform;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.ao.robopaint.export.LineImageExporter;
+import org.ao.robopaint.export.SvgRainbowImageExporter;
+import org.ao.robopaint.gcode.GCodeLineImageReader;
 import org.ao.robopaint.image.Line;
 import org.ao.robopaint.image.LineImage;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit test for simple App.
@@ -22,7 +30,8 @@ public class AppTest
      */
     public AppTest( String testName ) throws IOException {
         super( testName );
-        lineImageTransformer = new RandomBruteForceSpeedLineImageTransformer(10000, 100, 3);
+//        lineImageTransformer = new RandomBruteForceSpeedLineImageTransformer(10000, 100, 3);
+        lineImageTransformer = new RandomBruteForceSpeedLineImageTransformer(10000, 600, 600);
     }
 
     /**
@@ -58,5 +67,15 @@ public class AppTest
         LineImage result = lineImageTransformer.transform(source);
 
         assertEquals( 0, result.lines[0].x1 );
+    }
+
+    public void testOutlineNoLineMerge() throws URISyntaxException, IOException {
+        LineImage lineImage = new GCodeLineImageReader().read(getClassPathResource("outline.gcode"));
+
+        LineImage result = lineImageTransformer.transform(lineImage);
+    }
+
+    private Path getClassPathResource(String resource) throws URISyntaxException {
+        return Paths.get(ClassLoader.getSystemResource(resource).toURI());
     }
 }

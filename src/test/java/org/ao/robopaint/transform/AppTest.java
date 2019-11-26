@@ -75,6 +75,17 @@ public class AppTest
         LineImage result = lineImageTransformer.transform(lineImage);
     }
 
+    public void testOutlineLineMerge() throws URISyntaxException, IOException {
+        LineImage source = new GCodeLineImageReader().read(getClassPathResource("outline.gcode"));
+        ReversableLineImageTransformer simplifyTransform = new SimplifyLineImageTransformer();
+        LineImage simpleImage = simplifyTransform.transform(source);
+        LineImage simpleResult = lineImageTransformer.transform(simpleImage);
+        LineImage result = simplifyTransform.reverse(simpleResult);
+
+        LineImageExporter lineImageExporter = new SvgRainbowImageExporter(Paths.get("gcode-result"), 1000, 1000, 2);
+        lineImageExporter.export(result, "outline-result.svg");
+    }
+
     private Path getClassPathResource(String resource) throws URISyntaxException {
         return Paths.get(ClassLoader.getSystemResource(resource).toURI());
     }

@@ -21,7 +21,7 @@ public class RandomBruteForceSpeedLineImageTransformer implements LineImageTrans
 
     public RandomBruteForceSpeedLineImageTransformer(int iterationCount, int width, int height) throws IOException {
         this.iterationCount = iterationCount;
-        this.populationSize = 1000;
+        this.populationSize = 10000;
 
         lineImageExporter = new SvgRainbowImageExporter(Paths.get("debug-populations"), width, height, 1);
     }
@@ -35,8 +35,8 @@ public class RandomBruteForceSpeedLineImageTransformer implements LineImageTrans
         LineImageTransformerStrategy fullLineImageTransformerStrategy = new ShuffleLineImageTransformerStrategy();
         NormedLineImageTransformer fullNormedLineImageTransformer = new DefaultNormedLineImageTransformer(fullLineImageTransformerStrategy, normCalculator);
 
-        LineImageTransformerStrategy partialLineImageTransformerStrategy = new ShuffleLineImageTransformerStrategy(0.9);
-//        LineImageTransformerStrategy partialLineImageTransformerStrategy = new SwapLineImageTransformerStrategy();
+//        LineImageTransformerStrategy partialLineImageTransformerStrategy = new ShuffleLineImageTransformerStrategy(0.9);
+        LineImageTransformerStrategy partialLineImageTransformerStrategy = new SwapLineImageTransformerStrategy();
         NormedLineImageTransformer partialNormedLineImageTransformer = new DefaultNormedLineImageTransformer(partialLineImageTransformerStrategy, normCalculator);
 
 

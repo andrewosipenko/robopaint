@@ -1,5 +1,6 @@
 package org.ao.robopaint.transform;
 
+import org.ao.robopaint.image.Line;
 import org.ao.robopaint.image.LineImage;
 
 import java.util.Random;
@@ -18,7 +19,7 @@ public class SwapLineImageTransformerStrategy implements LineImageTransformerStr
 
     @Override
     public void transform(LineImage source, LineImage target) {
-        target.copyLinesFrom(source);
+        target.clone(source);
 
         Random random = ThreadLocalRandom.current();
         int i1 = random.nextInt(target.lines.length);
@@ -32,19 +33,25 @@ public class SwapLineImageTransformerStrategy implements LineImageTransformerStr
                 i2 = target.lines.length - 1;
             }
         }
-        swap(target.lines, i1, i2);
+        swap(target, i1, i2);
+        if(random.nextBoolean()){
+            target.reverse[i2] = !target.reverse[i2];
+        }
     }
 
-    // Implementing Fisher–Yates shuffle
-    private static <T> void swap(T[] array, int index1, int index2)
+    private static void swap(LineImage lineImage, int index1, int index2)
     {
         if(index1 == index2){
-            if(index1 < array.length - 1){
+            if(index1 < lineImage.lines.length - 1){
                 index2 = index1 + 1;
             }
         }
-        T temp = array[index1];
-        array[index1] = array[index2];
-        array[index2] = temp;
+        Line temp = lineImage.lines[index1];
+        lineImage.lines[index1] = lineImage.lines[index2];
+        lineImage.lines[index2] = temp;
+
+        boolean reverse =  lineImage.reverse[index1];
+        lineImage.reverse[index1] = lineImage.reverse[index2];
+        lineImage.reverse[index2] = reverse;
     }
 }

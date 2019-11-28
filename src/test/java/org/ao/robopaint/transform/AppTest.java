@@ -31,7 +31,7 @@ public class AppTest
     public AppTest( String testName ) throws IOException {
         super( testName );
 //        lineImageTransformer = new RandomBruteForceSpeedLineImageTransformer(10000, 100, 3);
-        lineImageTransformer = new RandomBruteForceSpeedLineImageTransformer(10000, 600, 600);
+        lineImageTransformer = new RandomBruteForceSpeedLineImageTransformer(10000, 5000, 100, 4, 5);
     }
 
     /**
@@ -53,6 +53,27 @@ public class AppTest
         assertEquals( 0, result.lines[0].x1 );
     }
 
+    public void testTwoLinesWithReverse() {
+        LineImage source = new LineImage(
+                new Line(3, 0, 2, 0),
+                new Line(0, 0, 1, 0)
+        );
+
+        LineImage result = lineImageTransformer.transform(source);
+
+        if (result.lines[0].x1 == 0) {
+            assertEquals(3, result.lines[1].x1);
+            assertTrue(result.reverse[1]);
+        }
+        else if (result.lines[0].x1 == 3){
+            assertEquals(0, result.lines[1].x1);
+            assertTrue(result.reverse[1]);
+        }
+        else {
+            fail();
+        }
+    }
+
     public void testManyLines() {
         int lineCount = 100;
         final int y = 2;
@@ -67,26 +88,5 @@ public class AppTest
         LineImage result = lineImageTransformer.transform(source);
 
         assertEquals( 0, result.lines[0].x1 );
-    }
-
-    public void testOutlineNoLineMerge() throws URISyntaxException, IOException {
-        LineImage lineImage = new GCodeLineImageReader().read(getClassPathResource("outline.gcode"));
-
-        LineImage result = lineImageTransformer.transform(lineImage);
-    }
-
-    public void testOutlineLineMerge() throws URISyntaxException, IOException {
-        LineImage source = new GCodeLineImageReader().read(getClassPathResource("outline.gcode"));
-        ReversableLineImageTransformer simplifyTransform = new SimplifyLineImageTransformer();
-        LineImage simpleImage = simplifyTransform.transform(source);
-        LineImage simpleResult = lineImageTransformer.transform(simpleImage);
-        LineImage result = simplifyTransform.reverse(simpleResult);
-
-        LineImageExporter lineImageExporter = new SvgRainbowImageExporter(Paths.get("gcode-result"), 1000, 1000, 2);
-        lineImageExporter.export(result, "outline-result.svg");
-    }
-
-    private Path getClassPathResource(String resource) throws URISyntaxException {
-        return Paths.get(ClassLoader.getSystemResource(resource).toURI());
     }
 }

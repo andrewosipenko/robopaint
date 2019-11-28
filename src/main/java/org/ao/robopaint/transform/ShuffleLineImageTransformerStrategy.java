@@ -18,7 +18,7 @@ public class ShuffleLineImageTransformerStrategy implements LineImageTransformer
 
     @Override
     public void transform(LineImage source, LineImage target) {
-        target.copyLinesFrom(source);
+        target.clone(source);
 
         if(shuffleRatio == 1) {
             shuffle(target.lines, 0, target.lines.length - 1);

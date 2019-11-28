@@ -19,11 +19,11 @@ public class RandomBruteForceSpeedLineImageTransformer implements LineImageTrans
 
     private LineImageExporter lineImageExporter;
 
-    public RandomBruteForceSpeedLineImageTransformer(int iterationCount, int width, int height) throws IOException {
+    public RandomBruteForceSpeedLineImageTransformer(int populationSize, int iterationCount, int width, int height, int scale) throws IOException {
+        this.populationSize = populationSize;
         this.iterationCount = iterationCount;
-        this.populationSize = 10000;
 
-        lineImageExporter = new SvgRainbowImageExporter(Paths.get("debug-populations"), width, height, 1);
+        lineImageExporter = new SvgRainbowImageExporter(Paths.get("debug-populations"), width, height, scale);
     }
 
     @Override
@@ -36,7 +36,7 @@ public class RandomBruteForceSpeedLineImageTransformer implements LineImageTrans
         NormedLineImageTransformer fullNormedLineImageTransformer = new DefaultNormedLineImageTransformer(fullLineImageTransformerStrategy, normCalculator);
 
 //        LineImageTransformerStrategy partialLineImageTransformerStrategy = new ShuffleLineImageTransformerStrategy(0.9);
-        LineImageTransformerStrategy partialLineImageTransformerStrategy = new SwapLineImageTransformerStrategy();
+        LineImageTransformerStrategy partialLineImageTransformerStrategy = new SwapLineImageTransformerStrategy(0.1);
         NormedLineImageTransformer partialNormedLineImageTransformer = new DefaultNormedLineImageTransformer(partialLineImageTransformerStrategy, normCalculator);
 
 
@@ -94,14 +94,14 @@ public class RandomBruteForceSpeedLineImageTransformer implements LineImageTrans
     }
 
     private void logProgress(int gen, List<NormedLineImage> population){
-        if(gen % 50 == 0) {
+        if(gen % 200 == 0) {
             System.out.println(String.format("Gen: %5s Current best speeds %s, %s, %s, %s, %s" , gen,
                     getNorm(population, 0), getNorm(population, 1),
                     getNorm(population, populationSize / 4),
                     getNorm(population, populationSize / 2),
                     getNorm(population, 3 * populationSize / 4)));
         }
-        if(gen % 500 == 0) {
+        if(gen % 1000 == 0) {
             lineImageExporter.export(population.get(0), String.format("gen-%04d.svg", gen));
         }
     }
@@ -116,13 +116,13 @@ public class RandomBruteForceSpeedLineImageTransformer implements LineImageTrans
     private NormedLineImage createNormedLineImage(LineImage lineImage, NormCalculator normCalculator){
         NormedLineImage result = new NormedLineImage(lineImage.lines.length);
         result.norm = normCalculator.calculate(lineImage);
-        result.copyLinesFrom(lineImage);
+        result.clone(lineImage);
         return result;
     }
 
     private LineImage createLineImage(LineImage lineImage){
         LineImage result = new LineImage(lineImage.lines.length);
-        result.copyLinesFrom(lineImage);
+        result.clone(lineImage);
         return result;
     }
 }

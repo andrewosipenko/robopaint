@@ -15,16 +15,23 @@ public class SpeedNormCalculator implements NormCalculator {
             return result;
         }
 
-        result += calculateNorm(lines[0].x1, lines[0].y1, lines[0].x2, lines[0].y2);
+//        result += calculateNorm(lines[0].x1, lines[0].y1, lines[0].x2, lines[0].y2);
         for (int i = 1; i < lines.length; i++) {
             Line previousLine = lines[i - 1];
+            boolean previousReverse = lineImage.reverse[i - 1];
             Line line = lines[i];
+            boolean reverse = lineImage.reverse[i];
 
-            result += calculateNorm(previousLine.x2, previousLine.y2, line.x1, line.y1);
-            if (previousLine.x2 != line.x1 || previousLine.y2 != line.y1){
+            int previouLineEndX = previousReverse ? previousLine.x1 : previousLine.x2;
+            int previousLineEndY = previousReverse ? previousLine.y1 : previousLine.y2;
+            int lineStartX = reverse ? line.x2 : line.x1;
+            int lineStartY = reverse ? line.y2 : line.y1;
+
+            result += calculateNorm(previouLineEndX, previousLineEndY, lineStartX, lineStartY);
+            if (previouLineEndX != lineStartX || previousLineEndY != lineStartY){
                 result += WHITESPACE_TO_LINE_GAP;
             }
-            result += calculateNorm(line.x1, line.y1, line.x2, line.y2);
+//            result += calculateNorm(line.x1, line.y1, line.x2, line.y2);
         }
         return result;
     }

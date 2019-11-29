@@ -7,6 +7,8 @@ import org.ao.robopaint.norm.*;
 
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
@@ -16,18 +18,21 @@ import java.util.stream.Stream;
 public class RandomBruteForceSpeedLineImageTransformer implements LineImageTransformer {
     private final int iterationCount;
     private final int populationSize;
+    private final double transformerDistanceRatio;
 
     private LineImageExporter lineImageExporter;
 
-    public RandomBruteForceSpeedLineImageTransformer(int populationSize, int iterationCount, int width, int height, int scale) throws IOException {
+    public RandomBruteForceSpeedLineImageTransformer(int populationSize, int iterationCount, int width, int height, double transformerDistanceRatio, int scale) throws IOException {
         this.populationSize = populationSize;
         this.iterationCount = iterationCount;
+        this.transformerDistanceRatio = transformerDistanceRatio;
 
         lineImageExporter = new SvgRainbowImageExporter(Paths.get("debug-populations"), width, height, scale);
     }
 
     @Override
     public LineImage transform(LineImage lineImage) {
+        Instant start = Instant.now();
         NormCalculator normCalculator = new SpeedNormCalculator();
         NormedLineImage source = createNormedLineImage(lineImage, normCalculator);
         System.out.println("Initial speed " + source.norm);
@@ -35,8 +40,8 @@ public class RandomBruteForceSpeedLineImageTransformer implements LineImageTrans
         LineImageTransformerStrategy fullLineImageTransformerStrategy = new ShuffleLineImageTransformerStrategy();
         NormedLineImageTransformer fullNormedLineImageTransformer = new DefaultNormedLineImageTransformer(fullLineImageTransformerStrategy, normCalculator);
 
-//        LineImageTransformerStrategy partialLineImageTransformerStrategy = new ShuffleLineImageTransformerStrategy(0.9);
-        LineImageTransformerStrategy partialLineImageTransformerStrategy = new SwapLineImageTransformerStrategy(0.1);
+//        LineImageTransformerStrategy partialLineImageTransformerStrategy = new ShuffleLineImageTransformerStrategy(transformerDistanceRatio);
+        LineImageTransformerStrategy partialLineImageTransformerStrategy = new SwapLineImageTransformerStrategy(transformerDistanceRatio);
         NormedLineImageTransformer partialNormedLineImageTransformer = new DefaultNormedLineImageTransformer(partialLineImageTransformerStrategy, normCalculator);
 
 
@@ -64,6 +69,9 @@ public class RandomBruteForceSpeedLineImageTransformer implements LineImageTrans
         }
 
         System.out.println("Result speed " + population.get(0).norm);
+        Instant finish = Instant.now();
+        Duration duration = Duration.between(start, finish);
+        System.out.println(String.format("Elapsed time: %dm %ds", duration.toMinutes(), duration.toSecondsPart()));
         return createLineImage(population.get(0));
     }
 

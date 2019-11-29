@@ -11,8 +11,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class SvgRainbowImageExporter
-//        extends AbstractRainbowImageExporter {
-    extends AbstractGradientImageExporter {
+        extends AbstractRainbowImageExporter {
+//    extends AbstractGradientImageExporter {
     private final int scale;
     private final Path dir;
     private final int width;

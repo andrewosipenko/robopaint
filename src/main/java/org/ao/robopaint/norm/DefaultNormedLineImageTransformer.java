@@ -17,7 +17,9 @@ public class DefaultNormedLineImageTransformer extends DefaultLineImageTransform
     @Override
     public NormedLineImage transform(NormedLineImage lineImage) {
         NormedLineImage result = super.transform(lineImage);
-        result.norm = normCalculator.calculate(result);
+        if(!result.isNormCalculated()) {
+            result.setNorm(normCalculator.calculate(result));
+        }
         return result;
     }
 

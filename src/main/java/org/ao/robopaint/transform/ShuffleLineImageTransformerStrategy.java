@@ -5,7 +5,7 @@ import org.ao.robopaint.image.LineImage;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class ShuffleLineImageTransformerStrategy implements LineImageTransformerStrategy {
+public class ShuffleLineImageTransformerStrategy implements LineImageTransformerStrategy<LineImage> {
     private final double shuffleRatio;
 
     public ShuffleLineImageTransformerStrategy(double shuffleRatio) {

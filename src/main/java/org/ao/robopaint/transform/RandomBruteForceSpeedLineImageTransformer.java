@@ -110,7 +110,7 @@ public class RandomBruteForceSpeedLineImageTransformer implements LineImageTrans
                     getNorm(population, 3 * populationSize / 4)));
         }
         if(gen % 1000 == 0) {
-            lineImageExporter.export(population.get(0), String.format("gen-%04d.svg", gen));
+            lineImageExporter.export(population.get(0), String.format("gen-%05d.svg", gen));
         }
     }
 
@@ -123,7 +123,7 @@ public class RandomBruteForceSpeedLineImageTransformer implements LineImageTrans
 
     private NormedLineImage createNormedLineImage(LineImage lineImage, NormCalculator normCalculator){
         NormedLineImage result = new NormedLineImage(lineImage.lines.length);
-        result.norm = normCalculator.calculate(lineImage);
+        result.setNorm(normCalculator.calculate(lineImage));
         result.clone(lineImage);
         return result;
     }

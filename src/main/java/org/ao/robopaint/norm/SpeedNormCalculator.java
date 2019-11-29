@@ -22,21 +22,27 @@ public class SpeedNormCalculator implements NormCalculator {
             Line line = lines[i];
             boolean reverse = lineImage.reverse[i];
 
-            int previouLineEndX = previousReverse ? previousLine.x1 : previousLine.x2;
-            int previousLineEndY = previousReverse ? previousLine.y1 : previousLine.y2;
-            int lineStartX = reverse ? line.x2 : line.x1;
-            int lineStartY = reverse ? line.y2 : line.y1;
-
-            result += calculateNorm(previouLineEndX, previousLineEndY, lineStartX, lineStartY);
-            if (previouLineEndX != lineStartX || previousLineEndY != lineStartY){
-                result += WHITESPACE_TO_LINE_GAP;
-            }
-//            result += calculateNorm(line.x1, line.y1, line.x2, line.y2);
+            result += calculateNorm(previousLine, previousReverse, line, reverse);
         }
         return result;
     }
 
-    private double calculateNorm(int x1, int y1, int x2, int y2){
+    public static double calculateNorm(Line previousLine, boolean previousReverse, Line line, boolean reverse){
+        double result = 0;
+
+        int previouLineEndX = previousReverse ? previousLine.x1 : previousLine.x2;
+        int previousLineEndY = previousReverse ? previousLine.y1 : previousLine.y2;
+        int lineStartX = reverse ? line.x2 : line.x1;
+        int lineStartY = reverse ? line.y2 : line.y1;
+
+        result += calculateNorm(previouLineEndX, previousLineEndY, lineStartX, lineStartY);
+        if (previouLineEndX != lineStartX || previousLineEndY != lineStartY){
+            result += WHITESPACE_TO_LINE_GAP;
+        }
+        return result;
+    }
+
+    private static double calculateNorm(int x1, int y1, int x2, int y2){
         return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
     }
 }

@@ -2,20 +2,23 @@ package org.ao.robopaint.transform;
 
 import org.ao.robopaint.image.Line;
 import org.ao.robopaint.image.LineImage;
+import org.ao.robopaint.norm.NormCalculator;
 import org.ao.robopaint.norm.NormedLineImage;
-import org.ao.robopaint.norm.SpeedNormCalculator;
 
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class SwapLineImageTransformerStrategy implements LineImageTransformerStrategy<NormedLineImage> {
     private final double distanceRatio;
+    private NormCalculator normCalculator;
 
-    public SwapLineImageTransformerStrategy(double distanceRatio) {
+    public SwapLineImageTransformerStrategy(double distanceRatio, NormCalculator normCalculator) {
         this.distanceRatio = distanceRatio;
+        this.normCalculator = normCalculator;
     }
 
-    public SwapLineImageTransformerStrategy() {
+    public SwapLineImageTransformerStrategy(NormCalculator normCalculator) {
+        this.normCalculator = normCalculator;
         distanceRatio = 1;
     }
 
@@ -38,6 +41,11 @@ public class SwapLineImageTransformerStrategy implements LineImageTransformerStr
                 i2 = target.lines.length - 1;
             }
         }
+        if (i1 > i2){
+            int temp = i1;
+            i1 = i2;
+            i2 = temp;
+        }
         swap(target, i1, i2);
         if(random.nextBoolean()){
             double oldLeftNorm1 = calculateLeftNorm(target, i2);
@@ -49,13 +57,14 @@ public class SwapLineImageTransformerStrategy implements LineImageTransformerStr
         }
     }
 
-    private static void swap(NormedLineImage lineImage, int index1, int index2)
-    {
+    private void swap(NormedLineImage lineImage, int index1, int index2) {
         if(index1 == index2){
             if(index1 < lineImage.lines.length - 1){
                 index2 = index1 + 1;
             }
         }
+//        verifyNorm(lineImage);
+
         double oldLeftNorm1 = calculateLeftNorm(lineImage, index1);
         double oldRightNorm1 = calculateRightNorm(lineImage, index1);
         double oldLeftNorm2 = calculateLeftNorm(lineImage, index2);
@@ -72,16 +81,39 @@ public class SwapLineImageTransformerStrategy implements LineImageTransformerStr
         double newRightNorm1 = calculateRightNorm(lineImage, index1);
         double newLeftNorm2 = calculateLeftNorm(lineImage, index2);
         double newRightNorm2 = calculateRightNorm(lineImage, index2);
-        lineImage.setNorm(lineImage.getNorm() -oldLeftNorm1 - oldRightNorm1 - oldLeftNorm2 - oldRightNorm2
-         + newLeftNorm1 + newRightNorm1 + newLeftNorm2 + newRightNorm2);
+
+        double normChange;
+        if (index2 == index1 + 1) {
+            normChange = - oldLeftNorm1 - oldRightNorm1 - oldRightNorm2
+                    + newLeftNorm1 + newRightNorm1 + newRightNorm2;
+        }
+        else {
+            normChange = - oldLeftNorm1 - oldRightNorm1 - oldLeftNorm2 - oldRightNorm2
+                    + newLeftNorm1 + newRightNorm1 + newLeftNorm2 + newRightNorm2;
+        }
+        lineImage.setNorm(lineImage.getNorm() + normChange);
+
+        if (ThreadLocalRandom.current().nextInt(100000) == 0) {
+            verifyNorm(lineImage);
+        }
     }
 
-    private static double calculateLeftNorm(NormedLineImage lineImage, int index){
-        return index > 0 ? SpeedNormCalculator.calculateNorm(lineImage.lines[index - 1], lineImage.reverse[index - 1],
+    private void verifyNorm(NormedLineImage lineImage) {
+//        System.out.println("Norm: " + lineImage.getNorm());
+        double recalculatedNorm = normCalculator.calculate(lineImage);
+//        System.out.println("Recalculated norm: " + recalculatedNorm);
+        if(Math.abs(lineImage.getNorm() - recalculatedNorm) > 0.1) {
+            throw new RuntimeException("Norm verification failed " + lineImage.getNorm() + " != "
+                    + recalculatedNorm);
+        }
+    }
+
+    private double calculateLeftNorm(NormedLineImage lineImage, int index){
+        return index > 0 ? normCalculator.calculateNorm(lineImage.lines[index - 1], lineImage.reverse[index - 1],
                 lineImage.lines[index], lineImage.reverse[index]) : 0;
     }
-    private static double calculateRightNorm(NormedLineImage lineImage, int index){
-        return index < lineImage.lines.length - 1 ? SpeedNormCalculator.calculateNorm(lineImage.lines[index], lineImage.reverse[index],
+    private double calculateRightNorm(NormedLineImage lineImage, int index){
+        return index < lineImage.lines.length - 1 ? normCalculator.calculateNorm(lineImage.lines[index], lineImage.reverse[index],
                 lineImage.lines[index + 1], lineImage.reverse[index + 1]) : 0;
     }
 }

@@ -6,7 +6,6 @@ import junit.framework.TestSuite;
 import org.ao.robopaint.export.LineImageExporter;
 import org.ao.robopaint.export.SvgRainbowImageExporter;
 import org.ao.robopaint.gcode.GCodeLineImageReader;
-import org.ao.robopaint.image.Line;
 import org.ao.robopaint.image.LineImage;
 
 import java.io.IOException;
@@ -28,7 +27,7 @@ public class OutlineTest
      */
     public OutlineTest(String testName ) throws IOException {
         super( testName );
-        lineImageTransformer = new RandomBruteForceSpeedLineImageTransformer(10000, 20000, 600, 600, 0.1, 1);
+        lineImageTransformer = new RandomBruteForceSpeedLineImageTransformer(10000, 10000, 600, 600, 0.1, 1);
     }
 
     /**

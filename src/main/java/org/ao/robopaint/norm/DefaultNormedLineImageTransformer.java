@@ -1,8 +1,5 @@
 package org.ao.robopaint.norm;
 
-import org.ao.robopaint.norm.NormedLineImage;
-import org.ao.robopaint.norm.NormCalculator;
-import org.ao.robopaint.norm.NormedLineImageTransformer;
 import org.ao.robopaint.transform.DefaultLineImageTransformer;
 import org.ao.robopaint.transform.LineImageTransformerStrategy;
 

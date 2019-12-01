@@ -41,7 +41,7 @@ public class RandomBruteForceSpeedLineImageTransformer implements LineImageTrans
         NormedLineImageTransformer fullNormedLineImageTransformer = new DefaultNormedLineImageTransformer(fullLineImageTransformerStrategy, normCalculator);
 
 //        LineImageTransformerStrategy partialLineImageTransformerStrategy = new ShuffleLineImageTransformerStrategy(transformerDistanceRatio);
-        LineImageTransformerStrategy partialLineImageTransformerStrategy = new SwapLineImageTransformerStrategy(transformerDistanceRatio);
+        LineImageTransformerStrategy partialLineImageTransformerStrategy = new SwapLineImageTransformerStrategy(transformerDistanceRatio, normCalculator);
         NormedLineImageTransformer partialNormedLineImageTransformer = new DefaultNormedLineImageTransformer(partialLineImageTransformerStrategy, normCalculator);
 
 
@@ -59,7 +59,7 @@ public class RandomBruteForceSpeedLineImageTransformer implements LineImageTrans
         logProgress(1, population);
 
         for(int i = 1; i <= iterationCount; i++){
-            List<NormedLineImage> newPopulation = population.parallelStream()
+            List<NormedLineImage> newPopulation = population.stream()
                     .map(partialNormedLineImageTransformer::transform)
                     .collect(Collectors.toList());
 

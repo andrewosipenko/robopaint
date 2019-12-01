@@ -8,7 +8,7 @@ public class SpeedNormCalculator implements NormCalculator {
 
     @Override
     public double calculate(LineImage lineImage) {
-        int result = 0;
+        double result = 0;
 
         Line[] lines = lineImage.lines;
         if (lines.length == 0) {
@@ -27,16 +27,16 @@ public class SpeedNormCalculator implements NormCalculator {
         return result;
     }
 
-    public static double calculateNorm(Line previousLine, boolean previousReverse, Line line, boolean reverse){
+    public double calculateNorm(Line previousLine, boolean previousReverse, Line line, boolean reverse){
         double result = 0;
 
-        int previouLineEndX = previousReverse ? previousLine.x1 : previousLine.x2;
+        int previousLineEndX = previousReverse ? previousLine.x1 : previousLine.x2;
         int previousLineEndY = previousReverse ? previousLine.y1 : previousLine.y2;
         int lineStartX = reverse ? line.x2 : line.x1;
         int lineStartY = reverse ? line.y2 : line.y1;
 
-        result += calculateNorm(previouLineEndX, previousLineEndY, lineStartX, lineStartY);
-        if (previouLineEndX != lineStartX || previousLineEndY != lineStartY){
+        result += calculateNorm(previousLineEndX, previousLineEndY, lineStartX, lineStartY);
+        if (previousLineEndX != lineStartX || previousLineEndY != lineStartY){
             result += WHITESPACE_TO_LINE_GAP;
         }
         return result;

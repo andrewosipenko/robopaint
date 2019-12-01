@@ -5,7 +5,7 @@ import org.ao.robopaint.image.LineImage;
 
 public abstract class AbstractMoveIncludedImageExporter implements LineImageExporter {
     private String LINE_COLOR = "#000000";
-    private String EMPTY_MOVE_COLOR = "#AAFFAA";
+    private String EMPTY_MOVE_COLOR = "#00FF00";
 
     private boolean exportEmptyMove;
 
@@ -15,15 +15,15 @@ public abstract class AbstractMoveIncludedImageExporter implements LineImageExpo
 
     @Override
     public void export(LineImage lineImage, String name) {
-        exportLine(lineImage.lines[0], LINE_COLOR);
+        exportLine(lineImage.lines[0], LINE_COLOR, false);
         for (int i = 1; i < lineImage.lines.length; i++){
             Line previousLine = lineImage.lines[i - 1];
             Line line = lineImage.lines[i];
 
             if (exportEmptyMove && (Math.abs(previousLine.x2 - line.x1) > 1 || Math.abs(previousLine.y2 - line.y2) > 1)) {
-                exportLine(new Line(previousLine.x2, previousLine.y2, line.x1, line.y1), EMPTY_MOVE_COLOR);
+                exportLine(new Line(previousLine.x2, previousLine.y2, line.x1, line.y1), EMPTY_MOVE_COLOR, false);
             }
-            exportLine(line, LINE_COLOR);
+            exportLine(line, LINE_COLOR, true);
         }
     }
     private String getColorHex(int color){
@@ -34,5 +34,5 @@ public abstract class AbstractMoveIncludedImageExporter implements LineImageExpo
         return result;
     }
 
-    protected abstract void exportLine(Line line, String colorHex);
+    protected abstract void exportLine(Line line, String colorHex, boolean opacity);
 }

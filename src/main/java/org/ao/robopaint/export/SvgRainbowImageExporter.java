@@ -70,7 +70,7 @@ public class SvgRainbowImageExporter
     }
 
     @Override
-    protected void exportLine(Line line, String colorHex)  {
+    protected void exportLine(Line line, String colorHex, boolean opacity)  {
         try {
             Writer writer = this.writer.get();
             writer.append("<line x1=\"");
@@ -83,7 +83,11 @@ public class SvgRainbowImageExporter
             writer.append(Integer.toString(line.y2));
             writer.append("\" style=\"stroke:");
             writer.append(colorHex);
-            writer.append(";stroke-width:1\"/>\n");
+            writer.append(";stroke-width:1\"");
+            if(!opacity){
+                writer.append(" opacity=\"0.3\"");
+            }
+            writer.append("/>\n");
         }
         catch (IOException e){
             throw new IOError(e);

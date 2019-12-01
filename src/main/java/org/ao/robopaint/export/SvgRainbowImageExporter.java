@@ -11,8 +11,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class SvgRainbowImageExporter
-        extends AbstractRainbowImageExporter {
+//        extends AbstractRainbowImageExporter {
 //    extends AbstractGradientImageExporter {
+        extends AbstractMoveIncludedImageExporter {
     private final int scale;
     private final Path dir;
     private final int width;
@@ -20,7 +21,8 @@ public class SvgRainbowImageExporter
 
     private final ThreadLocal<Writer> writer = new ThreadLocal<>();
 
-    public SvgRainbowImageExporter(Path dir, int width, int height, int scale) throws IOException {
+    public SvgRainbowImageExporter(Path dir, int width, int height, int scale, boolean exportEmptyMove) throws IOException {
+        super(exportEmptyMove);
         if (Files.isDirectory(dir)) {
             Files.list(dir).forEach(path -> {
                 try {

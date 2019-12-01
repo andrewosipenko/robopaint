@@ -25,7 +25,7 @@ public class GCodeLineImageReaderTest {
         assertEquals(124, line.x2);
         assertEquals(535, line.y1);
 
-        LineImageExporter lineImageExporter = new SvgRainbowImageExporter(Paths.get("gcode-initial"), 1000, 1000, 2);
+        LineImageExporter lineImageExporter = new SvgRainbowImageExporter(Paths.get("gcode-initial"), 1000, 1000, 2, false);
         lineImageExporter.export(lineImage, "outline.svg");
     }
 

@@ -31,7 +31,7 @@ public class AppTest
     public AppTest( String testName ) throws IOException {
         super( testName );
 //        lineImageTransformer = new RandomBruteForceSpeedLineImageTransformer(10000, 100, 3);
-        lineImageTransformer = new RandomBruteForceSpeedLineImageTransformer(10000, 5000, 100, 4, 1, 5);
+        lineImageTransformer = new RandomBruteForceSpeedLineImageTransformer(10000, 5000, 100, 4, 1, 5, false);
     }
 
     /**

@@ -22,12 +22,12 @@ public class RandomBruteForceSpeedLineImageTransformer implements LineImageTrans
 
     private LineImageExporter lineImageExporter;
 
-    public RandomBruteForceSpeedLineImageTransformer(int populationSize, int iterationCount, int width, int height, double transformerDistanceRatio, int scale) throws IOException {
+    public RandomBruteForceSpeedLineImageTransformer(int populationSize, int iterationCount, int width, int height, double transformerDistanceRatio, int scale, boolean exportEmptyMove) throws IOException {
         this.populationSize = populationSize;
         this.iterationCount = iterationCount;
         this.transformerDistanceRatio = transformerDistanceRatio;
 
-        lineImageExporter = new SvgRainbowImageExporter(Paths.get("debug-populations"), width, height, scale);
+        lineImageExporter = new SvgRainbowImageExporter(Paths.get("debug-populations"), width, height, scale, exportEmptyMove);
     }
 
     @Override
@@ -59,7 +59,7 @@ public class RandomBruteForceSpeedLineImageTransformer implements LineImageTrans
         logProgress(1, population);
 
         for(int i = 1; i <= iterationCount; i++){
-            List<NormedLineImage> newPopulation = population.stream()
+            List<NormedLineImage> newPopulation = population.parallelStream()
                     .map(partialNormedLineImageTransformer::transform)
                     .collect(Collectors.toList());
 
@@ -91,7 +91,8 @@ public class RandomBruteForceSpeedLineImageTransformer implements LineImageTrans
                             newPopulation.stream()
                         )
                 )
-                .sorted(Comparator.comparing(image -> image.norm))
+                .parallel()
+                 .sorted(Comparator.comparingDouble(NormedLineImage::getNorm))
                 .limit(populationSize)
                 .collect(Collectors.toList());
         if(result.size() == populationSize)

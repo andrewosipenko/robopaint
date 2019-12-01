@@ -24,6 +24,7 @@ public class SimplifyLineImageTransformer implements ReversableLineImageTransfor
             else {
                 if (!checkIfLinesConnected(currentLine.peekLast(), line)){
                     putTransformedLine(currentLine, result);
+                    currentLine = new LinkedList<>();
                 }
                 currentLine.addLast(line);
             }
@@ -46,7 +47,6 @@ public class SimplifyLineImageTransformer implements ReversableLineImageTransfor
         }
         reverseMap.put(transformedLine, currentLine);
         result.add(transformedLine);
-        currentLine.clear();
     }
 
     private boolean checkIfLinesConnected(Line line1, Line line2) {

@@ -27,7 +27,7 @@ public class OutlineTest
      */
     public OutlineTest(String testName ) throws IOException {
         super( testName );
-        lineImageTransformer = new RandomBruteForceSpeedLineImageTransformer(10000, 10000, 600, 600, 0.1, 1);
+        lineImageTransformer = new RandomBruteForceSpeedLineImageTransformer(10000, 10000, 600, 600, 0.1, 1, true);
     }
 
     /**
@@ -52,7 +52,7 @@ public class OutlineTest
         LineImage simpleResult = lineImageTransformer.transform(simpleImage);
         LineImage result = simplifyTransform.reverse(simpleResult);
 
-        LineImageExporter lineImageExporter = new SvgRainbowImageExporter(Paths.get("gcode-result"), 1000, 1000, 2);
+        LineImageExporter lineImageExporter = new SvgRainbowImageExporter(Paths.get("gcode-result"), 600, 600, 2, false);
         lineImageExporter.export(result, "outline-result.svg");
     }
 

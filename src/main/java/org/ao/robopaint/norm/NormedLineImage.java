@@ -1,5 +1,6 @@
 package org.ao.robopaint.norm;
 
+import org.ao.robopaint.image.Line;
 import org.ao.robopaint.image.LineImage;
 
 public class NormedLineImage extends LineImage {
@@ -8,6 +9,10 @@ public class NormedLineImage extends LineImage {
 
     public NormedLineImage(int lineCount) {
         super(lineCount);
+    }
+
+    public NormedLineImage(Line... lines) {
+        super(lines);
     }
 
     public void setNorm(double norm) {

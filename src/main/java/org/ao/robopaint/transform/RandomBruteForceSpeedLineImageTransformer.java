@@ -3,6 +3,8 @@ package org.ao.robopaint.transform;
 import org.ao.robopaint.export.LineImageExporter;
 import org.ao.robopaint.export.SvgRainbowImageExporter;
 import org.ao.robopaint.image.LineImage;
+import org.ao.robopaint.merge.ContinuousAreaImageMerger;
+import org.ao.robopaint.merge.ImageMerger;
 import org.ao.robopaint.norm.*;
 
 import java.io.IOException;
@@ -44,6 +46,7 @@ public class RandomBruteForceSpeedLineImageTransformer implements LineImageTrans
         LineImageTransformerStrategy partialLineImageTransformerStrategy = new SwapLineImageTransformerStrategy(transformerDistanceRatio, normCalculator);
         NormedLineImageTransformer partialNormedLineImageTransformer = new DefaultNormedLineImageTransformer(partialLineImageTransformerStrategy, normCalculator);
 
+        ImageMerger imageMerger = new ContinuousAreaImageMerger(0.2, normCalculator);
 
         List<NormedLineImage> population = new ArrayList<>();
         population.add(source);
@@ -62,7 +65,8 @@ public class RandomBruteForceSpeedLineImageTransformer implements LineImageTrans
             List<NormedLineImage> newPopulation = population.parallelStream()
                     .map(partialNormedLineImageTransformer::transform)
                     .collect(Collectors.toList());
-
+            List<NormedLineImage> mergedPopulation = mergePopulation(population, imageMerger);
+            newPopulation.addAll(mergedPopulation);
             population = cutPopulation(population, newPopulation, () -> fullNormedLineImageTransformer.transform(source));
 
             logProgress(i, population);
@@ -113,6 +117,19 @@ public class RandomBruteForceSpeedLineImageTransformer implements LineImageTrans
         if(gen % 1000 == 0) {
             lineImageExporter.export(population.get(0), String.format("gen-%05d.svg", gen));
         }
+    }
+
+    private List<NormedLineImage> mergePopulation(List<NormedLineImage> population, ImageMerger imageMerger) {
+
+        List<NormedLineImage> shuffledPopulation = new ArrayList<>(population);
+        Collections.shuffle(shuffledPopulation);
+        List<NormedLineImage> result = Stream.generate(() -> new NormedLineImage(population.get(0).lines.length))
+                .limit(population.size())
+        .collect(Collectors.toList());
+        for(int i = 0; i < population.size(); i++) {
+            imageMerger.merge(population.get(i), shuffledPopulation.get(i), result.get(i));
+        }
+        return result;
     }
 
     private Double getNorm(List<NormedLineImage> population, int index) {

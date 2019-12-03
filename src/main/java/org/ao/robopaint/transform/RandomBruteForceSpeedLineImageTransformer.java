@@ -47,7 +47,7 @@ public class RandomBruteForceSpeedLineImageTransformer implements LineImageTrans
         LineImageTransformerStrategy partialLineImageTransformerStrategy = new SwapLineImageTransformerStrategy(transformerDistanceRatio, normCalculator);
         NormedLineImageTransformer partialNormedLineImageTransformer = new DefaultNormedLineImageTransformer(partialLineImageTransformerStrategy, normCalculator);
 
-        ImageMerger imageMerger = new ContinuousAreaImageMerger(0.2, normCalculator);
+        ImageMerger imageMerger = new ContinuousAreaImageMerger(0.6, normCalculator);
 
         List<NormedLineImage> population = new ArrayList<>();
         population.add(source);

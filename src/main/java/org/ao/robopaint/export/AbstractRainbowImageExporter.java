@@ -14,12 +14,15 @@ public abstract class AbstractRainbowImageExporter implements LineImageExporter 
             "#000000"
     };
 
+    public AbstractRainbowImageExporter(boolean exportEmptyMove) {
+    }
+
     @Override
     public void export(LineImage lineImage, String name) {
         double colorLength = (double) lineImage.lines.length / colors.length;
         for (int i = 0; i < lineImage.lines.length; i++){
-            exportLine(lineImage.lines[i], colors[(int) (i / colorLength)]);
+            exportLine(lineImage.lines[i], colors[(int) (i / colorLength)], true);
         }
     }
-    protected abstract void exportLine(Line line, String colorHex);
+    protected abstract void exportLine(Line line, String colorHex, boolean opacity);
 }

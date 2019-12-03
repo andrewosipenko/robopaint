@@ -15,6 +15,7 @@ import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class RandomBruteForceSpeedLineImageTransformer implements LineImageTransformer {
@@ -65,7 +66,12 @@ public class RandomBruteForceSpeedLineImageTransformer implements LineImageTrans
             List<NormedLineImage> newPopulation = population.parallelStream()
                     .map(partialNormedLineImageTransformer::transform)
                     .collect(Collectors.toList());
-            List<NormedLineImage> mergedPopulation = mergePopulation(population, imageMerger);
+
+            List<NormedLineImage> population2 = new ArrayList<>(population);
+//            List<NormedLineImage> population2 = new ArrayList<>(newPopulation);
+            Collections.shuffle(population2);
+
+            List<NormedLineImage> mergedPopulation = mergePopulation(population, population2, imageMerger);
             newPopulation.addAll(mergedPopulation);
             population = cutPopulation(population, newPopulation, () -> fullNormedLineImageTransformer.transform(source));
 
@@ -119,17 +125,19 @@ public class RandomBruteForceSpeedLineImageTransformer implements LineImageTrans
         }
     }
 
-    private List<NormedLineImage> mergePopulation(List<NormedLineImage> population, ImageMerger imageMerger) {
-
-        List<NormedLineImage> shuffledPopulation = new ArrayList<>(population);
-        Collections.shuffle(shuffledPopulation);
-        List<NormedLineImage> result = Stream.generate(() -> new NormedLineImage(population.get(0).lines.length))
-                .limit(population.size())
-        .collect(Collectors.toList());
-        for(int i = 0; i < population.size(); i++) {
-            imageMerger.merge(population.get(i), shuffledPopulation.get(i), result.get(i));
-        }
-        return result;
+    private List<NormedLineImage> mergePopulation(
+            List<NormedLineImage> population1,
+            List<NormedLineImage> population2,
+            ImageMerger imageMerger
+    ) {
+        return IntStream.range(0, population1.size())
+                .parallel()
+                .mapToObj(index -> {
+                    NormedLineImage lineImage = new NormedLineImage(population1.get(0).lines.length);
+                    imageMerger.merge(population1.get(index), population2.get(index), lineImage);
+                    return lineImage;
+                })
+                .collect(Collectors.toList());
     }
 
     private Double getNorm(List<NormedLineImage> population, int index) {

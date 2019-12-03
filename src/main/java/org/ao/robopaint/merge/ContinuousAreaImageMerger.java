@@ -24,7 +24,7 @@ public class ContinuousAreaImageMerger implements ImageMerger {
         int start1 = random.nextInt(maxStart);
         int start2 = random.nextInt(maxStart);
         mergeInternally(source1, source2, target, areaSize, start1, start2);
-        normCalculator.calculate(target);
+        target.setNorm(normCalculator.calculate(target));
     }
     void mergeInternally(NormedLineImage source1, NormedLineImage source2, NormedLineImage target,
                                    int areaSize, int start1, int start2) {

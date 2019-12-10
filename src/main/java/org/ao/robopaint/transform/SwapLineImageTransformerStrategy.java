@@ -46,23 +46,51 @@ public class SwapLineImageTransformerStrategy implements LineImageTransformerStr
             i1 = i2;
             i2 = temp;
         }
-        swap(target, i1, i2);
-        if(random.nextBoolean()){
-            double oldLeftNorm1 = calculateLeftNorm(target, i2);
-            double oldRightNorm1 = calculateRightNorm(target, i2);
-            target.reverse[i2] = !target.reverse[i2];
-            double newLeftNorm1 = calculateLeftNorm(target, i2);
-            double newRightNorm1 = calculateRightNorm(target, i2);
-            target.setNorm(target.getNorm() - oldLeftNorm1 - oldRightNorm1 + newLeftNorm1 + newRightNorm1);
+        if(i1 == i2){
+            if(i1 < target.lines.length - 1){
+                i2 = i1 + 1;
+            }
+        }
+        boolean reverse = random.nextBoolean();
+        swapAndReverse(target, i1, i2, reverse);
+
+    }
+    public void swapAndReverse(NormedLineImage lineImage, int index1, int index2, boolean reverseIndex2) {
+        if(index1 != index2) {
+            swap(lineImage, index1, index2);
+        }
+
+        if(reverseIndex2){
+            double oldLeftNorm1 = calculateLeftNorm(lineImage, index2);
+            double oldRightNorm1 = calculateRightNorm(lineImage, index2);
+            lineImage.reverse[index2] = !lineImage.reverse[index2];
+            double newLeftNorm1 = calculateLeftNorm(lineImage, index2);
+            double newRightNorm1 = calculateRightNorm(lineImage, index2);
+            lineImage.setNorm(lineImage.getNorm() - oldLeftNorm1 - oldRightNorm1 + newLeftNorm1 + newRightNorm1);
         }
     }
 
-    private void swap(NormedLineImage lineImage, int index1, int index2) {
-        if(index1 == index2){
-            if(index1 < lineImage.lines.length - 1){
-                index2 = index1 + 1;
-            }
+    public void setLine(NormedLineImage lineImage, Line line, boolean reverse, int index){
+        double oldLeftNorm = calculateLeftNorm(lineImage, index);
+        double oldRightNorm = calculateRightNorm(lineImage, index);
+
+        lineImage.lines[index] = line;
+        lineImage.reverse[index] = reverse;
+
+        double newLeftNorm = calculateLeftNorm(lineImage, index);
+        double newRightNorm = calculateRightNorm(lineImage, index);
+
+        double normChange = - oldLeftNorm - oldRightNorm
+                    + newLeftNorm + newRightNorm;
+
+        lineImage.setNorm(lineImage.getNorm() + normChange);
+
+        if (ThreadLocalRandom.current().nextInt(100000) == 0) {
+            verifyNorm(lineImage);
         }
+    }
+    private void swap(NormedLineImage lineImage, int index1, int index2) {
+
 //        verifyNorm(lineImage);
 
         double oldLeftNorm1 = calculateLeftNorm(lineImage, index1);

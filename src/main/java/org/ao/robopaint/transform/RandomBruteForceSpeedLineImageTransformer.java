@@ -4,6 +4,7 @@ import org.ao.robopaint.export.LineImageExporter;
 import org.ao.robopaint.export.SvgRainbowImageExporter;
 import org.ao.robopaint.image.LineImage;
 import org.ao.robopaint.merge.ContinuousAreaImageMerger;
+import org.ao.robopaint.merge.FastContinuousAreaImageMerger;
 import org.ao.robopaint.merge.ImageMerger;
 import org.ao.robopaint.norm.*;
 
@@ -44,12 +45,14 @@ public class RandomBruteForceSpeedLineImageTransformer implements LineImageTrans
         NormedLineImageTransformer fullNormedLineImageTransformer = new DefaultNormedLineImageTransformer(fullLineImageTransformerStrategy, normCalculator);
 
 //        LineImageTransformerStrategy partialLineImageTransformerStrategy = new ShuffleLineImageTransformerStrategy(transformerDistanceRatio);
-        LineImageTransformerStrategy partialLineImageTransformerStrategy = new SwapLineImageTransformerStrategy(transformerDistanceRatio, normCalculator);
+        SwapLineImageTransformerStrategy partialLineImageTransformerStrategy = new SwapLineImageTransformerStrategy(transformerDistanceRatio, normCalculator);
         NormedLineImageTransformer partialNormedLineImageTransformer = new DefaultNormedLineImageTransformer(partialLineImageTransformerStrategy, normCalculator);
+        NormedLineImageTransformer reverseNormedLineImageTransformer = new DefaultNormedLineImageTransformer(new ReverseLineImageTransformerStrategy(0.6), normCalculator);
 
         ImageMerger imageMerger = new ContinuousAreaImageMerger(0.6, normCalculator);
+//        ImageMerger imageMerger = new FastContinuousAreaImageMerger(0.01, partialLineImageTransformerStrategy);
 
-        List<NormedLineImage> population = new ArrayList<>();
+                List<NormedLineImage> population = new ArrayList<>();
         population.add(source);
         logProgress(0, population);
         population.addAll(
@@ -71,8 +74,16 @@ public class RandomBruteForceSpeedLineImageTransformer implements LineImageTrans
 //            List<NormedLineImage> population2 = new ArrayList<>(newPopulation);
             Collections.shuffle(population2);
 
-            List<NormedLineImage> mergedPopulation = mergePopulation(population, population2, imageMerger);
+            List<NormedLineImage> mergedPopulation = mergePopulation(
+                    population2.subList(0, population2.size() / 2),
+                    population2.subList(population2.size() / 2, population2.size()), imageMerger);
             newPopulation.addAll(mergedPopulation);
+
+            List<NormedLineImage> reversedPopulation = population.parallelStream()
+                    .map(reverseNormedLineImageTransformer::transform)
+                    .collect(Collectors.toList());
+            newPopulation.addAll(reversedPopulation);
+
             population = cutPopulation(population, newPopulation, () -> fullNormedLineImageTransformer.transform(source));
 
             logProgress(i, population);

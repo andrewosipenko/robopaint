@@ -1,8 +1,7 @@
-package org.ao.robopaint.read;
+package org.ao.robopaint.io;
 
 import org.ao.robopaint.image.LineImage;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 

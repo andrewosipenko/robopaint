@@ -30,13 +30,13 @@ public class ContinuousAreaImageMerger implements ImageMerger {
                                    int areaSize, int start1, int start2) {
         Arrays.fill(target.lines, null);
         Set<Line> mergedLines = new HashSet<>(target.lines.length);
-        for(int i = start1; i < areaSize; i++){
+        for(int i = 0; i < areaSize; i++){
             mergedLines.add(target.lines[start2 + i] = source1.lines[start1 + i]);
             target.reverse[start2 + i] = source1.reverse[start1 + i];
         }
         List<Line> skippedLines = new ArrayList<>();
         List<Boolean> skippedReverse = new ArrayList<>();
-        for(int i = start1; i < areaSize; i++){
+        for(int i = 0; i < areaSize; i++){
             Line line = source2.lines[start2 + i];
             if(!mergedLines.contains(line)){
                 skippedLines.add(line);

@@ -6,6 +6,7 @@ import junit.framework.TestSuite;
 import org.ao.robopaint.export.LineImageExporter;
 import org.ao.robopaint.export.SvgRainbowImageExporter;
 import org.ao.robopaint.gcode.GCodeLineImageReader;
+import org.ao.robopaint.gcode.GCodeLineImageWriter;
 import org.ao.robopaint.image.LineImage;
 
 import java.io.IOException;
@@ -54,6 +55,7 @@ public class OutlineTest
 
         LineImageExporter lineImageExporter = new SvgRainbowImageExporter(Paths.get("gcode-result"), 600, 600, 2, false);
         lineImageExporter.export(result, "outline-result.svg");
+        new GCodeLineImageWriter().write(result, Path.of("outline-result.gcode"));
     }
 
     private Path getClassPathResource(String resource) throws URISyntaxException {

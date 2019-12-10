@@ -2,7 +2,7 @@ package org.ao.robopaint.gcode;
 
 import org.ao.robopaint.image.Line;
 import org.ao.robopaint.image.LineImage;
-import org.ao.robopaint.read.LineImageReader;
+import org.ao.robopaint.io.LineImageReader;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

@@ -1,30 +1,55 @@
 package org.ao.robopaint.norm;
 
-import org.ao.robopaint.image.Line;
-import org.ao.robopaint.image.LineImage;
+import org.ao.robopaint.image.Point;
+import org.ao.robopaint.image.indexed.IndexedLineImage;
+import org.ao.robopaint.image.indexed.PointIndex;
 
 public class SpeedNormCalculator implements NormCalculator {
     private static final double WHITESPACE_TO_LINE_GAP = 5;
 
-    @Override
-    public double calculate(LineImage lineImage) {
-        double result = 0;
+    private final PointIndex pointIndex;
+    private final Point start;
+    private final double[][] norms;
+    private final double[] startNorms;
 
-        Line[] lines = lineImage.lines;
-        if (lines.length == 0) {
-            return result;
+    public SpeedNormCalculator(PointIndex pointIndex, Point start) {
+        this.pointIndex = pointIndex;
+        this.start = start;
+        this.norms = preCalculateNormsForAllPossiblePointCombinations();
+        this.startNorms = preCalculateStartNormsForAllPossiblePointCombinations();
+    }
+
+    private double[][] preCalculateNormsForAllPossiblePointCombinations(){
+        int pointCount = pointIndex.getPointCount();
+        double [][]result = new double[pointCount][pointCount];
+        for (int start = 0; start < pointCount; start++){
+            for (int end = start + 1; end < pointCount; end++){
+                result[start][end] = result[end][start] = calculateNormInternally(pointIndex, start, end);
+            }
         }
+        return result;
+    }
 
-//        result += calculateNorm(lines[0].x1, lines[0].y1, lines[0].x2, lines[0].y2);
-        Line previousLine = lines[0];
-        boolean previousReverse = lineImage.reverse[0];
-        for (int i = 1; i < lines.length; i++) {
-            Line line = lines[i];
-            boolean reverse = lineImage.reverse[i];
+    private double[] preCalculateStartNormsForAllPossiblePointCombinations(){
+        int pointCount = pointIndex.getPointCount();
+        double []result = new double[pointCount];
+        int x1 = start.x;
+        int y1 = start.y;
 
-            result += calculateNorm(previousLine, previousReverse, line, reverse);
-            previousLine = line;
-            previousReverse = reverse;
+        for (int end = 1; end < pointCount; end++) {
+            int x2 = pointIndex.x(end);
+            int y2 = pointIndex.y(end);
+            result[end] = calculateNorm(x1, y1, x2, y2);
+        }
+        return result;
+    }
+
+    @Override
+    public double calculate(IndexedLineImage lineImage) {
+        double result = startNorms[lineImage.getStart(0)];
+
+        for (int i = 1; i < lineImage.getLineCount(); i++) {
+            result += norms[lineImage.getEnd(i - 1)][lineImage.getStart(i)];
         }
         return result;
     }
@@ -33,32 +58,16 @@ public class SpeedNormCalculator implements NormCalculator {
         return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
     }
 
-    public double calculateNorm(Line previousLine, boolean previousReverse, Line line, boolean reverse){
+    public double calculateNorm(int start, int end){
+        return calculateNormInternally(pointIndex, start, end);
+    }
 
-        final int previousLineEndX;
-        final int previousLineEndY;
-        if (previousReverse) {
-            previousLineEndX = previousLine.x1;
-            previousLineEndY = previousLine.y1;
-        }
-        else {
-            previousLineEndX = previousLine.x2;
-            previousLineEndY = previousLine.y2;
-        }
-        final int lineStartX;
-        final int lineStartY;
-        if (reverse) {
-            lineStartX = line.x2;
-            lineStartY = line.y2;
-        }
-        else {
-            lineStartX = line.x1;
-            lineStartY = line.y1;
-        }
-        double result = calculateNorm(previousLineEndX, previousLineEndY, lineStartX, lineStartY);
-        if (previousLineEndX != lineStartX || previousLineEndY != lineStartY){
-            result += WHITESPACE_TO_LINE_GAP;
-        }
-        return result;
+    private double calculateNormInternally(PointIndex pointIndex, int start, int end){
+        int x1 = pointIndex.x(start);
+        int y1 = pointIndex.y(start);
+        int x2 = pointIndex.x(end);
+        int y2 = pointIndex.y(end);
+
+        return calculateNorm(x1, y1, x2, y2);
     }
 }

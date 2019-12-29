@@ -1,9 +1,8 @@
 package org.ao.robopaint.norm;
 
-import org.ao.robopaint.image.Line;
-import org.ao.robopaint.image.LineImage;
+import org.ao.robopaint.image.indexed.IndexedLineImage;
 
 public interface NormCalculator {
-    double calculate(LineImage lineImage);
-    double calculateNorm(Line previousLine, boolean previousReverse, Line line, boolean reverse);
+    double calculate(IndexedLineImage lineImage);
+    double calculateNorm(int start, int end);
 }

@@ -1,0 +1,159 @@
+package org.ao.robopaint.transform.indexed;
+
+import org.ao.robopaint.export.*;
+import org.ao.robopaint.image.Point;
+import org.ao.robopaint.image.indexed.IndexedLineImage;
+import org.ao.robopaint.merge.ContinuousAreaImageMerger;
+import org.ao.robopaint.merge.ImageMerger;
+import org.ao.robopaint.norm.NormCalculator;
+import org.ao.robopaint.norm.SpeedNormCalculator;
+
+import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+public class RandomBruteForceSpeedLineImageTransformer implements LineImageTransformer {
+    private final int iterationCount;
+    private final int populationSize;
+    private final double transformerDistanceRatio;
+
+    private final ExportFacade exportFacade;
+    private final ExportState exportState;
+
+    public RandomBruteForceSpeedLineImageTransformer(int populationSize, int iterationCount, int width, int height, double transformerDistanceRatio, int scale, ExportFacade exportFacade,
+                                                     ExportState exportState) throws IOException {
+        this.populationSize = populationSize;
+        this.iterationCount = iterationCount;
+        this.transformerDistanceRatio = transformerDistanceRatio;
+        this.exportFacade = exportFacade;
+        this.exportState = exportState;
+    }
+
+    @Override
+    public IndexedLineImage transform(IndexedLineImage source) {
+        Instant start = Instant.now();
+        NormCalculator normCalculator = new SpeedNormCalculator(source.getPointIndex(), new Point(0, 0));
+        source.setNorm(normCalculator.calculate(source));
+        System.out.println("Initial speed " + source.getNorm());
+
+        LineImageTransformer fullLineImageTransformer = new ShuffleLineImageTransformer(normCalculator);
+        LineImageTransformer partialLineImageTransformer = new ShuffleLineImageTransformer(transformerDistanceRatio, normCalculator);
+
+        LineImageTransformer swapLineImageTransformer = new SwapLineImageTransformer(transformerDistanceRatio, normCalculator);
+        LineImageTransformer reverseLineImageTransformer = new ReverseLineImageTransformer(0.6, normCalculator);
+
+        ImageMerger imageMerger = new ContinuousAreaImageMerger(0.6, normCalculator);
+//        ImageMerger imageMerger = new FastContinuousAreaImageMerger(0.01, partialLineImageTransformerStrategy);
+
+        List<IndexedLineImage> population = new ArrayList<>();
+        population.add(source);
+        logProgress(0, population);
+        population.addAll(
+            Stream.generate(() -> source).limit(populationSize)
+                .parallel()
+                .map(fullLineImageTransformer::transform)
+                .collect(Collectors.toList()));
+            population = population.stream()
+                    .sorted(Comparator.comparing(image -> image.getNorm()))
+                    .collect(Collectors.toList());
+        logProgress(1, population);
+
+        for(int i = 1; i <= iterationCount; i++){
+            List<IndexedLineImage> newPopulation = population.parallelStream()
+                    .map(partialLineImageTransformer::transform)
+                    .collect(Collectors.toList());
+
+            List<IndexedLineImage> population2 = new ArrayList<>(population);
+//            List<IndexedLineImage> population2 = new ArrayList<>(newPopulation);
+            Collections.shuffle(population2);
+
+//            List<IndexedLineImage> mergedPopulation = mergePopulation(
+//                    population2.subList(0, population2.size() / 2),
+//                    population2.subList(population2.size() / 2, population2.size()), imageMerger);
+//            newPopulation.addAll(mergedPopulation);
+
+            List<IndexedLineImage> reversedPopulation = population.parallelStream()
+                    .map(reverseLineImageTransformer::transform)
+                    .collect(Collectors.toList());
+            newPopulation.addAll(reversedPopulation);
+
+            population = cutPopulation(population, newPopulation, () -> fullLineImageTransformer.transform(source));
+
+            logProgress(i, population);
+        }
+
+        System.out.println("Result speed " + population.get(0).getNorm());
+        Instant finish = Instant.now();
+        Duration duration = Duration.between(start, finish);
+        System.out.println(String.format("Elapsed time: %dm %ds", duration.toMinutes(), duration.toSecondsPart()));
+        return population.get(0);
+    }
+
+    private List<IndexedLineImage> cutPopulation(List<IndexedLineImage> population, List<IndexedLineImage> newPopulation,
+                                                Supplier<IndexedLineImage> supplier){
+
+        int bestProtectedCount = 1;
+        Random random = ThreadLocalRandom.current();
+        List<IndexedLineImage> result =
+                Stream.concat(
+                        population.stream()
+                            .limit(bestProtectedCount),
+                        Stream.concat(
+                            population.stream()
+                                .skip(bestProtectedCount),
+//                                .filter((image) -> random.nextDouble()  < 0.99), // kill older
+                            newPopulation.stream()
+                        )
+                )
+                .parallel()
+                 .sorted(Comparator.comparingDouble(IndexedLineImage::getNorm))
+                .limit(populationSize)
+                .collect(Collectors.toList());
+        if(result.size() == populationSize)
+            return result;
+        return Stream.concat(result.stream(), Stream.generate(supplier))
+                .limit(populationSize)
+                .collect(Collectors.toList());
+    }
+
+    private void logProgress(int gen, List<IndexedLineImage> population){
+        if(gen % 200 == 0) {
+            System.out.println(String.format("Gen: %5s Current best speeds %s, %s, %s, %s, %s" , gen,
+                    getNorm(population, 0), getNorm(population, 1),
+                    getNorm(population, populationSize / 4),
+                    getNorm(population, populationSize / 2),
+                    getNorm(population, 3 * populationSize / 4)));
+        }
+        if(gen % 1000 == 0) {
+            exportFacade.exportDebug(exportState, population.get(0), gen);
+        }
+    }
+
+    private List<IndexedLineImage> mergePopulation(
+            List<IndexedLineImage> population1,
+            List<IndexedLineImage> population2,
+            ImageMerger imageMerger
+    ) {
+//        return IntStream.range(0, population1.size())
+//                .parallel()
+//                .mapToObj(index -> {
+//                    IndexedLineImage lineImage = new IndexedLineImage(population1.get(0).lines.length);
+//                    imageMerger.merge(population1.get(index), population2.get(index), lineImage);
+//                    return lineImage;
+//                })
+//                .collect(Collectors.toList());
+        return Collections.emptyList();
+    }
+
+    private Double getNorm(List<IndexedLineImage> population, int index) {
+        if(index < population.size()){
+            return population.get(index).getNorm();
+        }
+        return null;
+    }
+}

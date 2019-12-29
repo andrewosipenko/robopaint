@@ -4,7 +4,9 @@ import org.ao.robopaint.image.Line;
 import org.ao.robopaint.image.LineImage;
 import org.ao.robopaint.io.LineImageWriter;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Path;
 
 public class GCodeLineImageWriter implements LineImageWriter {

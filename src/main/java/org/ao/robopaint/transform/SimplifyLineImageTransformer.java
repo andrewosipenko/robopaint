@@ -1,6 +1,5 @@
 package org.ao.robopaint.transform;
 
-import org.ao.robopaint.gcode.GCodeLineImageReader;
 import org.ao.robopaint.image.Line;
 import org.ao.robopaint.image.LineImage;
 

@@ -32,6 +32,18 @@ public class ExportState {
             this.path = path;
             this.rendering = rendering;
         }
+
+        public int getGeneration() {
+            return generation;
+        }
+
+        public Path getPath() {
+            return path;
+        }
+
+        public Rendering getRendering() {
+            return rendering;
+        }
     }
 
     public Path getSource() {

@@ -1,51 +1,78 @@
 package org.ao.robopaint.export;
 
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+
 import java.io.FileWriter;
-import java.io.IOError;
 import java.io.IOException;
 import java.io.Writer;
-import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class ReportGenerator {
+    private static Logger log = Logger.getLogger(ReportGenerator.class.getName());
+
     private final int scale;
     private final int width;
     private final int height;
 
-    public ReportGenerator(int scale, int width, int height) {
+    private Template template;
+
+    public ReportGenerator(int scale, int width, int height) throws IOException {
         this.scale = scale;
         this.width = width;
         this.height = height;
+
+        Configuration configuration = new Configuration(Configuration.VERSION_2_3_27);
+        configuration.setClassForTemplateLoading(this.getClass(), "/");
+        template = configuration.getTemplate("report.ftl");
     }
 
-    public void generate(ExportState exportState) {
-
+    public Path generate(ExportState exportState) throws IOException {
+        return generateIndexHtml(relativize(exportState));
     }
-    private void generateIndexHtml(ExportState exportState) throws IOException {
-        Path dir = exportState.getRootDir();
-        Path path = dir.resolve("index.html");
+    private ExportState relativize(ExportState exportState){
+        ExportState result = new ExportState();
+
+        Path rootDir = exportState.getRootDir();
+        result.setRootDir(exportState.getRootDir());
+
+        result.setSourceBaseName(exportState.getSourceBaseName());
+        result.setSourceRendering(rootDir.relativize(exportState.getSourceRendering()));
+
+        result.getDebug().addAll(
+            exportState.getDebug().stream()
+                .map(debugState ->
+                    new ExportState.DebugState(debugState.getGeneration(),
+                            rootDir.relativize(debugState.getPath()),
+                            debugState.getRendering())
+                )
+            .collect(Collectors.toList())
+        );
+
+        result.setResultRendering(rootDir.relativize(exportState.getResultRendering()));
+        return result;
+    }
+
+    private Path generateIndexHtml(ExportState exportState) throws IOException {
+        Path path = exportState.getRootDir().resolve("index.html");
         try (Writer writer = new FileWriter(path.toFile())) {
-            writer.append("<html><body>\n");
-            Files.list(dir)
-                    .filter(p -> p.getFileName().toString().endsWith(".svg"))
-                    .forEach(p -> {
-                        try {
-                            String fileName = p.getFileName().toString();
-                            writer.append("<p><img src='");
-                            writer.append(fileName);
-                            writer.append("' width='");
-                            writer.append(Integer.toString(scale * width));
-                            writer.append("' height='");
-                            writer.append(Integer.toString(scale * height));
-                            writer.append("'/>");
-                            writer.append(fileName);
-                            writer.append("</p>\n");
-                        } catch (IOException e) {
-                            throw new IOError(e);
-                        }
-                    });
-            writer.append("</body></html>");
-        }
-    }
+            try {
+                Map<String, Object> model = new HashMap<>();
+                model.put("exportState", exportState);
+                model.put("width", scale * width);
+                model.put("height", scale * height);
 
+                template.process(model, writer);
+            } catch (TemplateException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        log.info("Generated report " + path);
+        return path;
+    }
 }

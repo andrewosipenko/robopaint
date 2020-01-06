@@ -15,16 +15,18 @@
     </div>
     <div>
       <h2>Debug</h2>
+      <ul>
         <#list exportState.debug as item>
            <li>
              ${item.generation}
              <img src="${item.path}"/>
            </li>
         </#list>
+      </ul>
     </div>
     <div>
       <h2>Result</h2>
-      <img src="${exportState.resultRendering}"/>
+      <img src="${exportState.resultRendering!''}"/>
     </div>
   </body>
 </html>

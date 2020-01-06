@@ -54,7 +54,9 @@ public class ReportGenerator {
             .collect(Collectors.toList())
         );
 
-        result.setResultRendering(rootDir.relativize(exportState.getResultRendering()));
+        if(exportState.getResultRendering() != null) {
+            result.setResultRendering(rootDir.relativize(exportState.getResultRendering()));
+        }
         return result;
     }
 
@@ -72,7 +74,7 @@ public class ReportGenerator {
                 throw new RuntimeException(e);
             }
         }
-        log.info("Generated report " + path);
+        log.info("Generated report " + path.toAbsolutePath());
         return path;
     }
 }

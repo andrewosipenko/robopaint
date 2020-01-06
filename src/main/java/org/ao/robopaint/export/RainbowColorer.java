@@ -1,9 +1,6 @@
 package org.ao.robopaint.export;
 
-import org.ao.robopaint.image.Line;
-import org.ao.robopaint.image.indexed.IndexedLineImage;
-
-public abstract class RainbowColorer implements Colorer {
+public class RainbowColorer implements Colorer {
     private String[] colors = new String[]{
             "#f80c12",
             "#ff9933",
@@ -16,6 +13,6 @@ public abstract class RainbowColorer implements Colorer {
 
     @Override
     public String getColor(int lineIndex, int totalLineCount) {
-        return colors[(int) (lineIndex / totalLineCount)];
+        return colors[(int) (lineIndex  * colors.length / totalLineCount)];
     }
 }

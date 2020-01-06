@@ -1,6 +1,6 @@
 package org.ao.robopaint.export;
 
-public abstract class GradientColorer implements Colorer {
+public class GradientColorer implements Colorer {
     private int sourceR = 0;
     private int sourceB = 0xFF;
     private int targetR = 0xFF;

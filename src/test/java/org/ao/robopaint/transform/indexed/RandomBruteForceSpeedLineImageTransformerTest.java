@@ -7,7 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
@@ -16,15 +16,22 @@ public class RandomBruteForceSpeedLineImageTransformerTest {
     LineImageTransformer lineImageTransformer;
     ExportFacade exportFacade;
     ExportState exportState;
+    ReportGenerator reportGenerator;
 
     @Before
     public void setUp() throws Exception {
         int width = 100;
         int height = 4;
         Colorer blackColorer = new FixedColorer("#000000");
+        reportGenerator = new ReportGenerator(4, width, height);
         exportFacade = new ExportFacade(
                 new SvgImageExporter(width, height, blackColorer,  Colorer.NOOP_COLORER),
-                Collections.singletonMap(Rendering.MOVE, new SvgImageExporter(width, height, blackColorer,  new FixedColorer("#00FF00")))
+                Map.of(
+                        Rendering.MOVE, new SvgImageExporter(width, height, blackColorer,  new FixedColorer("#00FF00")),
+                        Rendering.GRADIENT, new SvgImageExporter(width, height, blackColorer, new GradientColorer()),
+                        Rendering.RAINBOW, new SvgImageExporter(width, height, blackColorer, new RainbowColorer())
+                ),
+                reportGenerator
         );
         exportState = exportFacade.createState();
         lineImageTransformer = new RandomBruteForceSpeedLineImageTransformer(10000, 1000, width, height, 1, 5, exportFacade, exportState);
@@ -40,6 +47,8 @@ public class RandomBruteForceSpeedLineImageTransformerTest {
 
         IndexedLineImage result = lineImageTransformer.transform(source);
 
+        exportFacade.exportResult(exportState, null, result);
+
         assertEquals( 0, result.getStart(0) );
     }
 
@@ -52,6 +61,8 @@ public class RandomBruteForceSpeedLineImageTransformerTest {
         exportFacade.exportInitial(exportState, source);
 
         IndexedLineImage result = lineImageTransformer.transform(source);
+
+        exportFacade.exportResult(exportState, null, result);
 
         assertEquals(0, result.getStart(0));
         assertEquals(1, result.getEnd(0));
@@ -74,6 +85,8 @@ public class RandomBruteForceSpeedLineImageTransformerTest {
         exportFacade.exportInitial(exportState, source);
 
         IndexedLineImage result = lineImageTransformer.transform(source);
+
+        exportFacade.exportResult(exportState, null, result);
 
         assertEquals(0, result.getStart(0));
         assertEquals(1, result.getEnd(0));

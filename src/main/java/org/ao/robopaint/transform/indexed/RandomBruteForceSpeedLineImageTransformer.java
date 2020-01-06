@@ -1,6 +1,7 @@
 package org.ao.robopaint.transform.indexed;
 
 import org.ao.robopaint.export.*;
+import org.ao.robopaint.gcode.GCodeLineImageReader;
 import org.ao.robopaint.image.Point;
 import org.ao.robopaint.image.indexed.IndexedLineImage;
 import org.ao.robopaint.merge.ContinuousAreaImageMerger;
@@ -14,10 +15,13 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class RandomBruteForceSpeedLineImageTransformer implements LineImageTransformer {
+    private static Logger log = Logger.getLogger(RandomBruteForceSpeedLineImageTransformer.class.getName());
+
     private final int iterationCount;
     private final int populationSize;
     private final double transformerDistanceRatio;
@@ -130,7 +134,11 @@ public class RandomBruteForceSpeedLineImageTransformer implements LineImageTrans
                     getNorm(population, 3 * populationSize / 4)));
         }
         if(gen % 1000 == 0) {
-            exportFacade.exportDebug(exportState, population.get(0), gen);
+            try {
+                exportFacade.exportDebug(exportState, population.get(0), gen);
+            } catch (IOException e) {
+                log.warning("Failed to export debug");
+            }
         }
     }
 

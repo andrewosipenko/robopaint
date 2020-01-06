@@ -31,13 +31,16 @@ public class ExportFacade implements AutoCloseable {
 
     private final LineImageExporter imageExporter;
     private final Map<Rendering, LineImageExporter> debugImageExporters;
+    private final ReportGenerator reportGenerator;
 
     public ExportFacade(
             LineImageExporter imageExporter,
-            Map<Rendering, LineImageExporter> debugImageExporters
+            Map<Rendering, LineImageExporter> debugImageExporters,
+            ReportGenerator reportGenerator
     ) {
         this.imageExporter = imageExporter;
         this.debugImageExporters = debugImageExporters;
+        this.reportGenerator = reportGenerator;
     }
 
     public ExportState createState() {
@@ -47,6 +50,7 @@ public class ExportFacade implements AutoCloseable {
     public void exportInitial(ExportState exportState, IndexedLineImage image) throws IOException {
         exportState.setSourceBaseName("unknown");
         exportInitialInternal(exportState, image);
+        reportGenerator.generate(exportState);
     }
 
     public void exportInitial(ExportState exportState, Path source, IndexedLineImage image) throws IOException {
@@ -77,7 +81,7 @@ public class ExportFacade implements AutoCloseable {
     }
 
 
-    public void exportDebug(ExportState exportState, IndexedLineImage image, int generation) {
+    public void exportDebug(ExportState exportState, IndexedLineImage image, int generation) throws IOException {
         debugImageExporters.entrySet().stream().map(
                 entry -> {
                     Path debugRendering = exportState.getDebugDir().resolve(entry.getKey() + "gen_" + generation + "_" + image.getNorm() + ".svg");
@@ -85,16 +89,28 @@ public class ExportFacade implements AutoCloseable {
                     return new ExportState.DebugState(generation, debugRendering, entry.getKey());
                 }
         ).forEach(exportState.getDebug()::add);
+
+        reportGenerator.generate(exportState);
     }
 
     public void exportResult(ExportState exportState, Path result, IndexedLineImage resultImage) throws IOException {
         Path resultDir = exportState.getRootDir().resolve("3_result");
-        Files.copy(result, resultDir);
-        Path resultRendering = resultDir.resolve(result.toFile().getName() + ".svg");
+        Files.createDirectory(resultDir);
+        final String resultBaseName;
+        if (result != null) {
+            Files.copy(result, resultDir);
+            resultBaseName = result.toFile().getName();
+        }
+        else {
+            resultBaseName = "unknown";
+        }
+        Path resultRendering = resultDir.resolve( resultBaseName + ".svg");
         imageExporter.export(resultImage, resultRendering);
         exportState.setResultDir(resultDir);
         exportState.setResult(result);
         exportState.setResultRendering(resultRendering);
+
+        reportGenerator.generate(exportState);
     }
 
     @Override

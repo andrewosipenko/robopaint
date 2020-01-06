@@ -58,6 +58,18 @@ public class OutlineTest
         new GCodeLineImageWriter().write(result, Path.of("outline-result.gcode"));
     }
 
+    public void testAgSpiralM0LineMerge() throws URISyntaxException, IOException {
+        LineImage source = new GCodeLineImageReader().read(getClassPathResource("AgSpiralM0.gcode"));
+        ReversableLineImageTransformer simplifyTransform = new SimplifyLineImageTransformer();
+        LineImage simpleImage = simplifyTransform.transform(source);
+        LineImage simpleResult = lineImageTransformer.transform(simpleImage);
+        LineImage result = simplifyTransform.reverse(simpleResult);
+
+        LineImageExporter lineImageExporter = new SvgRainbowImageExporter(Paths.get("gcode-result"), 600, 600, 2, false);
+        lineImageExporter.export(result, "outline-result.svg");
+        new GCodeLineImageWriter().write(result, Path.of("outline-result.gcode"));
+    }
+
     private Path getClassPathResource(String resource) throws URISyntaxException {
         return Paths.get(ClassLoader.getSystemResource(resource).toURI());
     }

@@ -4,7 +4,6 @@ import org.ao.robopaint.export.LineImageExporter;
 import org.ao.robopaint.export.SvgRainbowImageExporter;
 import org.ao.robopaint.image.LineImage;
 import org.ao.robopaint.merge.ContinuousAreaImageMerger;
-import org.ao.robopaint.merge.FastContinuousAreaImageMerger;
 import org.ao.robopaint.merge.ImageMerger;
 import org.ao.robopaint.norm.*;
 

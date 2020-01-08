@@ -5,34 +5,21 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.ao.robopaint.transform.indexed.LineImageTransformer;
 import org.ao.robopaint.transform.indexed.RandomBruteForceSpeedLineImageTransformer;
+import org.junit.Before;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
-/**
- * Unit test for simple App.
- */
-public class OutlineTest
-    extends TestCase
+public class OutlineTest extends TestCase
 {
-    LineImageTransformer lineImageTransformer;
-    /**
-     * Create the test case
-     *
-     * @param testName name of the test case
-     */
-    public OutlineTest(String testName ) throws IOException {
-        super( testName );
-//        lineImageTransformer = new RandomBruteForceSpeedLineImageTransformer(10000, 10000, 600, 600, 0.1, 1, true);
-    }
+    Application application;
 
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite()
-    {
-        return new TestSuite( OutlineTest.class );
+    @Before
+    public void setUp() throws Exception {
+        application = new Application(4, 600, 600);
     }
-
 
 //    public void testOutlineNoLineMerge() throws URISyntaxException, IOException {
 //        IndexedLineImage lineImage = new GCodeLineImageReader().read(getClassPathResource("outline.gcode"));

@@ -1,40 +1,22 @@
 package org.ao.robopaint.transform.indexed;
 
-import org.ao.robopaint.export.*;
+import org.ao.robopaint.Application;
 import org.ao.robopaint.image.indexed.IndexedLineImage;
 import org.ao.robopaint.image.indexed.PointIndex;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
 
 public class RandomBruteForceSpeedLineImageTransformerTest {
-    LineImageTransformer lineImageTransformer;
-    ExportFacade exportFacade;
-    ExportState exportState;
-    ReportGenerator reportGenerator;
+    Application application;
 
     @Before
     public void setUp() throws Exception {
-        int width = 100;
-        int height = 4;
-        Colorer blackColorer = new FixedColorer("#000000");
-        reportGenerator = new ReportGenerator(4, width, height);
-        exportFacade = new ExportFacade(
-                new SvgImageExporter(width, height, blackColorer,  Colorer.NOOP_COLORER),
-                Map.of(
-                        Rendering.MOVE, new SvgImageExporter(width, height, blackColorer,  new FixedColorer("#00FF00")),
-                        Rendering.GRADIENT, new SvgImageExporter(width, height, blackColorer, new GradientColorer()),
-                        Rendering.RAINBOW, new SvgImageExporter(width, height, blackColorer, new RainbowColorer())
-                ),
-                reportGenerator
-        );
-        exportState = exportFacade.createState();
-        lineImageTransformer = new RandomBruteForceSpeedLineImageTransformer(10000, 1000, width, height, 1, 5, exportFacade, exportState);
+        application = new Application(4, 100, 4);
     }
 
     @Test
@@ -43,11 +25,11 @@ public class RandomBruteForceSpeedLineImageTransformerTest {
         IndexedLineImage source = new IndexedLineImage(pointIndex, 2);
         source.set(0, 2, 3);
         source.set(1, 0, 1);
-        exportFacade.exportInitial(exportState, source);
+        application.getExportFacade().exportInitial(application.getExportState(), source);
 
-        IndexedLineImage result = lineImageTransformer.transform(source);
+        IndexedLineImage result = application.getLineImageTransformer().transform(source);
 
-        exportFacade.exportResult(exportState, null, result);
+        application.getExportFacade().exportResult(application.getExportState(), null, result);
 
         assertEquals( 0, result.getStart(0) );
     }
@@ -58,11 +40,11 @@ public class RandomBruteForceSpeedLineImageTransformerTest {
         IndexedLineImage source = new IndexedLineImage(pointIndex, 2);
         source.set(0, 3, 2);
         source.set(1, 0, 1);
-        exportFacade.exportInitial(exportState, source);
+        application.getExportFacade().exportInitial(application.getExportState(), source);
 
-        IndexedLineImage result = lineImageTransformer.transform(source);
+        IndexedLineImage result = application.getLineImageTransformer().transform(source);
 
-        exportFacade.exportResult(exportState, null, result);
+        application.getExportFacade().exportResult(application.getExportState(), null, result);
 
         assertEquals(0, result.getStart(0));
         assertEquals(1, result.getEnd(0));
@@ -82,11 +64,11 @@ public class RandomBruteForceSpeedLineImageTransformerTest {
             source.set(i * 2, i * 2, i * 2 + 1);
             source.set(i * 2 + 1, lineCount - i * 2 - 1, lineCount - i * 2);
         }
-        exportFacade.exportInitial(exportState, source);
+        application.getExportFacade().exportInitial(application.getExportState(), source);
 
-        IndexedLineImage result = lineImageTransformer.transform(source);
+        IndexedLineImage result = application.getLineImageTransformer().transform(source);
 
-        exportFacade.exportResult(exportState, null, result);
+        application.getExportFacade().exportResult(application.getExportState(), null, result);
 
         assertEquals(0, result.getStart(0));
         assertEquals(1, result.getEnd(0));

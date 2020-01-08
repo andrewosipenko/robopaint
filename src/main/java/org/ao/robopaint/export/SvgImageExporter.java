@@ -65,6 +65,7 @@ public class SvgImageExporter implements LineImageExporter {
 
             color = lineColorer.getColor(i, lineImage.getLineCount());
             exportLine(line, color, true, writer);
+            previousLine = line;
         }
     }
 

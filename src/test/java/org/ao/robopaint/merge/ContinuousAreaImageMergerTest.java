@@ -1,17 +1,14 @@
 package org.ao.robopaint.merge;
 
-import org.ao.robopaint.image.Line;
 import org.ao.robopaint.image.indexed.IndexedLineImage;
 import org.ao.robopaint.image.indexed.PointIndex;
 import org.junit.Test;
 
+import java.util.stream.IntStream;
+
 import static org.junit.Assert.assertEquals;
 
 public class ContinuousAreaImageMergerTest {
-    private Line line1 = new Line(0, 0, 0, 0);
-    private Line line2 = new Line(1, 0, 0, 0);
-    private Line line3 = new Line(2, 0, 0, 0);
-    private Line line4 = new Line(3, 0, 0, 0);
     private ContinuousAreaImageMerger imageMerger = new ContinuousAreaImageMerger(0.5, null);
 
     @Test
@@ -151,6 +148,36 @@ public class ContinuousAreaImageMergerTest {
         assertEquals(1, target.getStart(3));
         assertEquals(2, target.getEnd(3));
     }
+
+    @Test
+    public void testMergeBigData() {
+        final int lineCount = 1000;
+        final int times = 100000;
+        PointIndex pointIndex = createSequentialPointIndex(lineCount + 1);
+
+        IndexedLineImage source1 = new IndexedLineImage(pointIndex, lineCount);
+        for (int i = 0; i < lineCount; i++) {
+            source1.set(i, i, i + 1);
+        }
+
+        IndexedLineImage source2 = new IndexedLineImage(source1);
+
+        IntStream.range(0, times).forEach(i -> {
+            IndexedLineImage target = new IndexedLineImage(pointIndex, lineCount);
+            imageMerger.mergeInternally(
+                    source1,
+                    source2,
+                    target,
+                    400, 0, 500);
+
+            assertEquals(500, target.getStart(0));
+            assertEquals(501, target.getEnd(0));
+
+            assertEquals(400, target.getStart(400));
+            assertEquals(401, target.getEnd(400));
+        });
+    }
+
 
     private PointIndex createSequentialPointIndex(int count){
         PointIndex pointIndex = new PointIndex(count);

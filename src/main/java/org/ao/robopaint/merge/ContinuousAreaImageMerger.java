@@ -1,13 +1,14 @@
 package org.ao.robopaint.merge;
 
-import org.ao.robopaint.image.indexed.IndexedLine;
 import org.ao.robopaint.image.indexed.IndexedLineImage;
 import org.ao.robopaint.norm.NormCalculator;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class ContinuousAreaImageMerger implements ImageMerger {
+
     private final double ratio;
     private NormCalculator normCalculator;
 
@@ -36,33 +37,31 @@ public class ContinuousAreaImageMerger implements ImageMerger {
     }
     void mergeInternally(IndexedLineImage source1, IndexedLineImage source2, IndexedLineImage target,
                                    int areaSize, int start1, int start2) {
-        int[] mergedStarts = new int[areaSize];
-        int[] mergedEnds = new int[areaSize];
+        int[] merged = new int[areaSize];
 
-        copy(source1, target, areaSize, start1, start2, mergedStarts, mergedEnds);
+        copy(source1, target, areaSize, start1, start2, merged);
+        sort(merged);
 
-        fill(source2, target, areaSize, start2, mergedStarts, mergedEnds);
+        fill(source2, target, areaSize, start2, merged);
     }
 
     private void copy(IndexedLineImage source1, IndexedLineImage target, int areaSize, int start1, int start2,
-                      int[] mergedStarts, int[] mergedEnds) {
+                      int[] merged) {
         for(int i = 0; i < areaSize; i++){
             int start = source1.getStart(start1 + i);
             int end = source1.getEnd(start1 + i);
             target.set(start2 + i, start, end);
             if(start >= end) {
-                mergedStarts[i] = start;
-                mergedEnds[i] = end;
+                merged[i] = start * source1.getLineCount() + end;
             }
             else {
-                mergedStarts[i] = end;
-                mergedEnds[i] = start;
+                merged[i] = end * source1.getLineCount() + start;
             }
         }
     }
 
     private void fill(IndexedLineImage source2, IndexedLineImage target, int areaSize, int start2,
-                      int[] mergedStarts, int[] mergedEnds){
+                      int[] merged){
         int skipped = 0;
         for(int targetIndex = 0, source2Index = 0; targetIndex < target.getLineCount(); ) {
             if(targetIndex == start2) {
@@ -71,12 +70,12 @@ public class ContinuousAreaImageMerger implements ImageMerger {
             else {
                 int start = source2.getStart(source2Index);
                 int end = source2.getEnd(source2Index);
-                if (skipped == mergedStarts.length) {
+                if (skipped == merged.length) {
                     target.set(targetIndex, start, end);
                     targetIndex++;
                 }
                 else {
-                    if (contains(mergedStarts, mergedEnds, start, end)) {
+                    if (contains(merged, start, end, source2.getLineCount())) {
                         skipped++;
                     }
                     else {
@@ -88,21 +87,17 @@ public class ContinuousAreaImageMerger implements ImageMerger {
             }
         }
     }
-    private boolean contains(int[] mergedStarts, int[] mergedEnds, int start, int end){
-        int start1, end1;
+    private boolean contains(int[] merged, int start, int end, int multiplier){
+        int check;
         if(start >= end) {
-            start1 = start;
-            end1 = end;
+            check = multiplier * start + end;
         }
         else {
-            start1 = end;
-            end1 = start;
+            check = multiplier * end + start;
         }
-        for(int i = 0; i < mergedStarts.length; i++){
-            if(mergedStarts[i] == start1 && mergedEnds[i] == end1) {
-                return true;
-            }
-        }
-        return false;
+        return Arrays.binarySearch(merged, check) >= 0;
+    }
+    private void sort(int[] merged){
+        Arrays.sort(merged);
     }
 }

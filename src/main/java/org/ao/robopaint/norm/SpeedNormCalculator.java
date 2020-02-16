@@ -9,7 +9,7 @@ public class SpeedNormCalculator implements NormCalculator {
 
     private final PointIndex pointIndex;
     private final Point start;
-    private final double[][] norms;
+    private final double[] norms;
     private final double[] startNorms;
 
     public SpeedNormCalculator(PointIndex pointIndex, Point start) {
@@ -19,12 +19,12 @@ public class SpeedNormCalculator implements NormCalculator {
         this.startNorms = preCalculateStartNormsForAllPossiblePointCombinations();
     }
 
-    private double[][] preCalculateNormsForAllPossiblePointCombinations(){
+    private double[] preCalculateNormsForAllPossiblePointCombinations(){
         int pointCount = pointIndex.getPointCount();
-        double [][]result = new double[pointCount][pointCount];
+        double []result = new double[pointCount * pointCount];
         for (int start = 0; start < pointCount; start++){
             for (int end = start + 1; end < pointCount; end++){
-                result[start][end] = result[end][start] = calculateNormInternally(pointIndex, start, end);
+                result[start * pointCount + end] = result[end * pointCount + start] = calculateNormInternally(pointIndex, start, end);
             }
         }
         return result;
@@ -47,9 +47,9 @@ public class SpeedNormCalculator implements NormCalculator {
     @Override
     public double calculate(IndexedLineImage lineImage) {
         double result = startNorms[lineImage.getStart(0)];
-
+        int pointCount = pointIndex.getPointCount();
         for (int i = 1; i < lineImage.getLineCount(); i++) {
-            result += norms[lineImage.getEnd(i - 1)][lineImage.getStart(i)];
+            result += norms[lineImage.getEnd(i - 1) * pointCount + lineImage.getStart(i)];
         }
         return result;
     }

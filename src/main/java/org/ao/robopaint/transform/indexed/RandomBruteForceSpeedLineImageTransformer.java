@@ -4,6 +4,7 @@ import org.ao.robopaint.export.*;
 import org.ao.robopaint.gcode.GCodeLineImageReader;
 import org.ao.robopaint.image.Point;
 import org.ao.robopaint.image.indexed.IndexedLineImage;
+import org.ao.robopaint.image.indexed.PointIndex;
 import org.ao.robopaint.merge.ContinuousAreaImageMerger;
 import org.ao.robopaint.merge.ImageMerger;
 import org.ao.robopaint.norm.NormCalculator;
@@ -147,10 +148,12 @@ public class RandomBruteForceSpeedLineImageTransformer implements LineImageTrans
             List<IndexedLineImage> population2,
             ImageMerger imageMerger
     ) {
+        PointIndex pointIndex = population1.get(0).getPointIndex();
+        int lineCount = population1.get(0).getLineCount();
         return IntStream.range(0, population1.size())
                 .parallel()
                 .mapToObj(index -> {
-                    IndexedLineImage lineImage = new IndexedLineImage(population1.get(0));
+                    IndexedLineImage lineImage = new IndexedLineImage(pointIndex, lineCount);
                     imageMerger.merge(population1.get(index), population2.get(index), lineImage);
                     return lineImage;
                 })

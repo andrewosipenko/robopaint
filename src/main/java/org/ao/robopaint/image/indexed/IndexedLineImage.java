@@ -56,7 +56,8 @@ public class IndexedLineImage {
     }
 
     private void copyFrom(IndexedLineImage source){
-        for (int i = 0; i < source.getLineCount(); i++) {
+        int lineCount = source.getLineCount();
+        for (int i = 0; i < lineCount; i++) {
             start[i] = source.start[i];
             end[i] = source.end[i];
         }

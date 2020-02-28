@@ -15,7 +15,8 @@ public class ReverseLineImageTransformer extends AbstractAreaTransformer impleme
 
         int area = getArea(source);
         int start = getStart(source, area);
-        for(int i = 0; i < (int)Math.ceil(area / 2.0); i++) {
+        int maxIndex = (int)Math.ceil(area / 2.0);
+        for(int i = 0; i < maxIndex; i++) {
             reverse(target, start + i, start + area - i - 1);
         }
         target.setNorm(normCalculator.calculate(target));

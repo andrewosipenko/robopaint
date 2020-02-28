@@ -48,7 +48,8 @@ public class SpeedNormCalculator implements NormCalculator {
     public double calculate(IndexedLineImage lineImage) {
         double result = startNorms[lineImage.getStart(0)];
         int pointCount = pointIndex.getPointCount();
-        for (int i = 1; i < lineImage.getLineCount(); i++) {
+        int lineCount = lineImage.getLineCount();
+        for (int i = 1; i < lineCount; i++) {
             result += norms[lineImage.getEnd(i - 1) * pointCount + lineImage.getStart(i)];
         }
         return result;

@@ -47,15 +47,16 @@ public class ContinuousAreaImageMerger implements ImageMerger {
 
     private void copy(IndexedLineImage source1, IndexedLineImage target, int areaSize, int start1, int start2,
                       int[] merged) {
+        int lineCount = source1.getLineCount();
         for(int i = 0; i < areaSize; i++){
             int start = source1.getStart(start1 + i);
             int end = source1.getEnd(start1 + i);
             target.set(start2 + i, start, end);
             if(start >= end) {
-                merged[i] = start * source1.getLineCount() + end;
+                merged[i] = start * lineCount + end;
             }
             else {
-                merged[i] = end * source1.getLineCount() + start;
+                merged[i] = end * lineCount + start;
             }
         }
     }
@@ -63,7 +64,8 @@ public class ContinuousAreaImageMerger implements ImageMerger {
     private void fill(IndexedLineImage source2, IndexedLineImage target, int areaSize, int start2,
                       int[] merged){
         int skipped = 0;
-        for(int targetIndex = 0, source2Index = 0; targetIndex < target.getLineCount(); ) {
+        int lineCount = target.getLineCount();
+        for(int targetIndex = 0, source2Index = 0; targetIndex < lineCount; ) {
             if(targetIndex == start2) {
                 targetIndex = start2 + areaSize;
             }

@@ -33,7 +33,7 @@ public class SpeedNormCalculatorTest {
             image.set(i * 2 + 1, LINE_COUNT - i * 2 - 1, LINE_COUNT - i * 2);
         }
 
-        for(int j = 0; j < 1000000; j++) {
+        for(int j = 0; j < 1_000_000; j++) {
             assertTrue(normCalculator.calculate(image) > 0);
         }
     }

@@ -31,7 +31,7 @@ public class Application {
                 reportGenerator
         );
         exportState = exportFacade.createState();
-        lineImageTransformer = new RandomBruteForceSpeedLineImageTransformer(10000, 1000, width, height, 1, 5, exportFacade, exportState);
+        lineImageTransformer = new RandomBruteForceSpeedLineImageTransformer(1000, 20000, width, height, 1, 5, exportFacade, exportState);
     }
 
     public int getScale() {

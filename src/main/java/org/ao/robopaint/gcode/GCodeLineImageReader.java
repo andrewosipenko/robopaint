@@ -18,7 +18,7 @@ public class GCodeLineImageReader implements LineImageReader {
     private static Logger log = Logger.getLogger(GCodeLineImageReader.class.getName());
 
     private static final String PEN_DOWN_Z = "Z-1";
-    private static final Pattern PATTERN = Pattern.compile(".*X(\\d+)\\sY(\\d+)\\s" + PEN_DOWN_Z);
+    private static final Pattern PATTERN = Pattern.compile("G01\\sX(\\d+)\\sY(\\d+)\\s*");
 
     @Override
     public LineImage read(Path path) throws IOException {

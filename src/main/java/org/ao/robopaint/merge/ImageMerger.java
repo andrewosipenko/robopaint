@@ -1,7 +1,7 @@
 package org.ao.robopaint.merge;
 
-import org.ao.robopaint.norm.NormedLineImage;
+import org.ao.robopaint.image.indexed.IndexedLineImage;
 
 public interface ImageMerger {
-    void merge(NormedLineImage source1, NormedLineImage source2, NormedLineImage target);
+    void merge(IndexedLineImage source1, IndexedLineImage source2, IndexedLineImage target);
 }

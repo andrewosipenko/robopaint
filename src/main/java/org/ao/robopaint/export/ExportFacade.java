@@ -98,7 +98,7 @@ public class ExportFacade implements AutoCloseable {
         Files.createDirectory(resultDir);
         final String resultBaseName;
         if (result != null) {
-            Files.copy(result, resultDir);
+            Files.copy(result, result = resultDir.resolve(result.getFileName()));
             resultBaseName = result.toFile().getName();
         }
         else {

@@ -3,6 +3,7 @@ package org.ao.robopaint.transform;
 import junit.framework.TestCase;
 import org.ao.robopaint.Application;
 import org.ao.robopaint.gcode.GCodeLineImageReader;
+import org.ao.robopaint.gcode.GCodeLineImageWriter;
 import org.ao.robopaint.image.ImageConverter;
 import org.ao.robopaint.image.LineImage;
 import org.ao.robopaint.image.indexed.IndexedLineImage;
@@ -10,6 +11,7 @@ import org.junit.Before;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -37,18 +39,19 @@ public class OutlineTest extends TestCase
         LineImage source = new GCodeLineImageReader().read(getClassPathResource("outline.gcode"));
         ReversableLineImageTransformer simplifyTransform = new SimplifyLineImageTransformer();
         LineImage simpleImage = simplifyTransform.transform(source);
-        IndexedLineImage indexedLineImage = new ImageConverter().convert(simpleImage);
+        ImageConverter imageConverter = new ImageConverter();
+        IndexedLineImage indexedLineImage = imageConverter.convert(simpleImage);
         application.getExportFacade().exportInitial(application.getExportState(), indexedLineImage);
 
         IndexedLineImage indexedLineImageResult = application.getLineImageTransformer().transform(indexedLineImage);
-//        LineImage result = simplifyTransform.reverse(simpleResult);
+        LineImage simpleResult = imageConverter.convert(indexedLineImageResult);
+        LineImage result = simplifyTransform.reverse(simpleResult);
 
-        application.getExportFacade().exportResult(application.getExportState(), null, indexedLineImageResult);
+        Path resultPath = Files.createTempFile("outline-result", ".gcode");
+        new GCodeLineImageWriter().write(result, resultPath);
 
-//        LineImageExporter lineImageExporter = new SvgRainbowImageExporter(Paths.get("gcode-result"), 600, 600, 2, false);
-//        lineImageExporter.export(result, "outline-result.svg");
-//        new GCodeLineImageWriter().write(result, Path.of("outline-result.gcode"));
-
+        application.getExportFacade().exportResult(
+                application.getExportState(), resultPath, imageConverter.convert(result));
     }
 
     private Path getClassPathResource(String resource) throws URISyntaxException {

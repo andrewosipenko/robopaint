@@ -5,6 +5,7 @@ import org.ao.robopaint.image.LineImage;
 
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class SimplifyLineImageTransformer implements ReversableLineImageTransformer {
     private static Logger log = Logger.getLogger(SimplifyLineImageTransformer.class.getName());
@@ -14,7 +15,11 @@ public class SimplifyLineImageTransformer implements ReversableLineImageTransfor
     public LineImage transform(LineImage lineImage) {
         List<Line> result = new ArrayList<>();
         LinkedList<Line> currentLine = new LinkedList<>();
-        reverseMap = new HashMap<>();
+        reverseMap = new TreeMap<>(Comparator.comparing(Line::getX1)
+                .thenComparing(Line::getY1)
+                .thenComparing(Line::getX2)
+                .thenComparing(Line::getY2)
+        );
 
         for (Line line : lineImage.lines) {
             if (currentLine.isEmpty()) {
@@ -55,7 +60,16 @@ public class SimplifyLineImageTransformer implements ReversableLineImageTransfor
     @Override
     public LineImage reverse(LineImage lineImage) {
         List<Line> result = Arrays.stream(lineImage.lines)
-                .map(reverseMap::get)
+                .map(a -> {
+                    List<Line> l = reverseMap.get(a);
+                    if(l == null) {
+                        l = new ArrayList<>(reverseMap.get(new Line(a.x2, a.y2, a.x1, a.y1)));
+                        Collections.reverse(l);
+                        l = l.stream().map(line -> new Line(line.x2, line.y2, line.x1, line.y1))
+                                .collect(Collectors.toList());
+                    }
+                    return l;
+                })
                 .reduce((a, b) -> {
                     List<Line> c = new ArrayList<>();
                     c.addAll(a);

@@ -4,6 +4,8 @@ import org.ao.robopaint.image.indexed.IndexedLineImage;
 import org.ao.robopaint.image.indexed.PointIndex;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class ImageConverter {
     public IndexedLineImage convert(LineImage lineImage) {
@@ -12,6 +14,19 @@ public class ImageConverter {
         PointIndex pointIndex = getPointIndex(points.keySet());
 
         return getIndexedLineImage(lineImage, pointIndex, points);
+    }
+
+    public LineImage convert(IndexedLineImage indexedLineImage){
+        return new LineImage(IntStream.range(0, indexedLineImage.getLineCount())
+            .mapToObj(index ->
+                    new Line(
+                            indexedLineImage.getLineStartX(index),
+                            indexedLineImage.getLineStartY(index),
+                            indexedLineImage.getLineEndX(index),
+                            indexedLineImage.getLineEndY(index)
+                    )
+            )
+            .toArray(Line[]::new));
     }
 
     private LinkedHashMap<Point, Integer> getPoints(LineImage lineImage) {

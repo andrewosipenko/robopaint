@@ -2,6 +2,7 @@ package org.ao.robopaint.transform.indexed;
 
 import org.ao.robopaint.image.LineImage;
 import org.ao.robopaint.norm.NormCalculator;
+import org.ao.robopaint.transform.LineImageTransformer;
 
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;

@@ -1,9 +1,5 @@
 package org.ao.robopaint.app;
 
-import org.ao.robopaint.gcode.GCodeLineImageReader;
-import org.ao.robopaint.image.LineImage;
-import org.ao.robopaint.image.indexed.IndexedLineImage;
-
 import java.io.IOException;
 import java.nio.file.Path;
 

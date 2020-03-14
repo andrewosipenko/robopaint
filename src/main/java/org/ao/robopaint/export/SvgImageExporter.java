@@ -1,7 +1,7 @@
 package org.ao.robopaint.export;
 
 import org.ao.robopaint.image.Line;
-import org.ao.robopaint.image.indexed.IndexedLineImage;
+import org.ao.robopaint.image.LineImage;
 
 import java.io.FileWriter;
 import java.io.IOError;
@@ -23,7 +23,7 @@ public class SvgImageExporter implements LineImageExporter {
     }
 
     @Override
-    public void export(IndexedLineImage lineImage, Path path) {
+    public void export(LineImage lineImage, Path path) {
         try {
             System.out.println("Exporting " + path);
             try (Writer writer = new FileWriter(path.toFile())) {
@@ -41,7 +41,7 @@ public class SvgImageExporter implements LineImageExporter {
         }
     }
 
-    private void exportLines(IndexedLineImage lineImage, Writer writer) {
+    private void exportLines(LineImage lineImage, Writer writer) {
         Line previousLine = new Line(
                 lineImage.getLineStartX(0),
                 lineImage.getLineStartY(0),
@@ -50,7 +50,7 @@ public class SvgImageExporter implements LineImageExporter {
         );
         String color = lineColorer.getColor(0, lineImage.getLineCount());
         exportLine(previousLine, color, false, writer);
-        for (int i = 1; i < lineImage.getLineCount(); i++){
+        for (int i = 1; i < lineImage.lines.length; i++){
             Line line = new Line(
                     lineImage.getLineStartX(i),
                     lineImage.getLineStartY(i),

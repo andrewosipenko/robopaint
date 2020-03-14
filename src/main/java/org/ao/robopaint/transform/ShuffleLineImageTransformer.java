@@ -1,24 +1,28 @@
 package org.ao.robopaint.transform;
 
 import org.ao.robopaint.image.LineImage;
+import org.ao.robopaint.norm.NormCalculator;
 
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class ShuffleLineImageTransformerStrategy implements LineImageTransformerStrategy<LineImage> {
+public class ShuffleLineImageTransformer implements LineImageTransformer {
     private final double shuffleRatio;
+    private final NormCalculator normCalculator;
 
-    public ShuffleLineImageTransformerStrategy(double shuffleRatio) {
+    public ShuffleLineImageTransformer(double shuffleRatio, NormCalculator normCalculator) {
         this.shuffleRatio = shuffleRatio;
+        this.normCalculator = normCalculator;
     }
 
-    public ShuffleLineImageTransformerStrategy() {
+    public ShuffleLineImageTransformer(NormCalculator normCalculator) {
         shuffleRatio = 1;
+        this.normCalculator = normCalculator;
     }
 
     @Override
-    public void transform(LineImage source, LineImage target) {
-        target.clone(source);
+    public LineImage transform(LineImage source) {
+        LineImage target = new LineImage(source);
 
         if(shuffleRatio == 1) {
             shuffle(target.lines, 0, target.lines.length - 1);
@@ -29,6 +33,11 @@ public class ShuffleLineImageTransformerStrategy implements LineImageTransformer
             int start = random.nextInt(target.lines.length - shuffleBatchSize);
             shuffle(target.lines, start, start + shuffleBatchSize - 1);
         }
+        target.setNorm(normCalculator.calculate(target));
+        if(target.lines[0] == target.lines[1]){
+            throw new IllegalStateException();
+        }
+        return target;
     }
 
     // Implementing Fisher–Yates shuffle

@@ -1,14 +1,13 @@
 package org.ao.robopaint.merge;
 
-import org.ao.robopaint.image.indexed.IndexedLineImage;
+import org.ao.robopaint.image.Line;
+import org.ao.robopaint.image.LineImage;
 import org.ao.robopaint.norm.NormCalculator;
 
-import java.util.Arrays;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class ContinuousAreaImageMerger implements ImageMerger {
-
     private final double ratio;
     private NormCalculator normCalculator;
 
@@ -18,88 +17,51 @@ public class ContinuousAreaImageMerger implements ImageMerger {
     }
 
     @Override
-    public void merge(IndexedLineImage source1, IndexedLineImage source2, IndexedLineImage target){
+    public void merge(LineImage source1, LineImage source2, LineImage target) {
         Random random = ThreadLocalRandom.current();
-        int areaSize = Math.max(2, random.nextInt((int)(ratio * source1.getLineCount())));
-        int maxStart = source1.getLineCount() - areaSize;
-        int start1;
-        int start2;
-        if(maxStart > 0) {
-            start1 = random.nextInt(maxStart);
-            start2 = random.nextInt(maxStart);
-        }
-        else {
-            start1 = start2 = 0;
-        }
-
+        int areaSize = Math.max(1, random.nextInt((int)(ratio * source1.lines.length)));
+        int maxStart = source1.lines.length - areaSize;
+        int start1 = random.nextInt(maxStart + 1);
+        int start2 = random.nextInt(maxStart + 1);
         mergeInternally(source1, source2, target, areaSize, start1, start2);
         target.setNorm(normCalculator.calculate(target));
-    }
-    void mergeInternally(IndexedLineImage source1, IndexedLineImage source2, IndexedLineImage target,
-                                   int areaSize, int start1, int start2) {
-        int[] merged = new int[areaSize];
-
-        copy(source1, target, areaSize, start1, start2, merged);
-        sort(merged);
-
-        fill(source2, target, areaSize, start2, merged);
-    }
-
-    private void copy(IndexedLineImage source1, IndexedLineImage target, int areaSize, int start1, int start2,
-                      int[] merged) {
-        int lineCount = source1.getLineCount();
-        for(int i = 0; i < areaSize; i++){
-            int start = source1.getStart(start1 + i);
-            int end = source1.getEnd(start1 + i);
-            target.set(start2 + i, start, end);
-            if(start >= end) {
-                merged[i] = start * lineCount + end;
-            }
-            else {
-                merged[i] = end * lineCount + start;
-            }
+        if(target.lines[0] == target.lines[1]){
+            throw new IllegalStateException();
         }
     }
-
-    private void fill(IndexedLineImage source2, IndexedLineImage target, int areaSize, int start2,
-                      int[] merged){
-        int skipped = 0;
-        int lineCount = target.getLineCount();
-        for(int targetIndex = 0, source2Index = 0; targetIndex < lineCount; ) {
-            if(targetIndex == start2) {
-                targetIndex = start2 + areaSize;
+    void mergeInternally(LineImage source1, LineImage source2, LineImage target,
+                                   int areaSize, int start1, int start2) {
+        Arrays.fill(target.lines, null);
+        Set<Line> mergedLines = new HashSet<>(target.lines.length);
+        for(int i = 0; i < areaSize; i++){
+            mergedLines.add(target.lines[start2 + i] = source1.lines[start1 + i]);
+            target.reverse[start2 + i] = source1.reverse[start1 + i];
+        }
+        List<Line> skippedLines = new ArrayList<>();
+        List<Boolean> skippedReverse = new ArrayList<>();
+        for(int i = 0; i < areaSize; i++){
+            Line line = source2.lines[start2 + i];
+            if(!mergedLines.contains(line)){
+                skippedLines.add(line);
+                skippedReverse.add(source2.reverse[start2 + i]);
             }
-            else {
-                int start = source2.getStart(source2Index);
-                int end = source2.getEnd(source2Index);
-                if (skipped == merged.length) {
-                    target.set(targetIndex, start, end);
-                    targetIndex++;
+        }
+        Iterator<Line> lineIterator = skippedLines.iterator();
+        Iterator<Boolean> reverseIterator = skippedReverse.iterator();
+        for(int i = 0; i < target.lines.length; i++) {
+            if(target.lines[i] == null) {
+                if (mergedLines.contains(source2.lines[i])){
+                    target.lines[i] = lineIterator.next();
+                    target.reverse[i] = reverseIterator.next();
                 }
                 else {
-                    if (contains(merged, start, end, source2.getLineCount())) {
-                        skipped++;
-                    }
-                    else {
-                        target.set(targetIndex, start, end);
-                        targetIndex++;
-                    }
+                    target.lines[i] = source2.lines[i];
+                    target.reverse[i] = source2.reverse[i];
                 }
-                source2Index++;
             }
         }
-    }
-    private boolean contains(int[] merged, int start, int end, int multiplier){
-        int check;
-        if(start >= end) {
-            check = multiplier * start + end;
+        if(lineIterator.hasNext()) {
+            throw new IllegalArgumentException("One line was not processed still");
         }
-        else {
-            check = multiplier * end + start;
-        }
-        return Arrays.binarySearch(merged, check) >= 0;
-    }
-    private void sort(int[] merged){
-        Arrays.sort(merged);
     }
 }

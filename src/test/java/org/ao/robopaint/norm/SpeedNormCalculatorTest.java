@@ -2,6 +2,7 @@ package org.ao.robopaint.norm;
 
 import org.ao.robopaint.image.Line;
 import org.ao.robopaint.image.LineImage;
+import org.ao.robopaint.image.Point;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -19,7 +20,7 @@ public class SpeedNormCalculatorTest {
     @Before
     public void setUp() {
         lines = createSequentialPointIndex(POINT_COUNT);
-        normCalculator = new SpeedNormCalculator();
+        normCalculator = new SpeedNormCalculator(new Point(0, 0));
     }
 
     @Test

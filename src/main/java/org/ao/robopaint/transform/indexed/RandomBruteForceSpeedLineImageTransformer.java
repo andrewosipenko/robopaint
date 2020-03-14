@@ -9,6 +9,9 @@ import org.ao.robopaint.merge.ImageMerger;
 import org.ao.robopaint.norm.NormCalculator;
 import org.ao.robopaint.norm.SpeedNormCalculator;
 import org.ao.robopaint.transform.LineImageTransformer;
+import org.ao.robopaint.transform.ReverseLineImageTransformer;
+import org.ao.robopaint.transform.ShuffleLineImageTransformer;
+import org.ao.robopaint.transform.SwapLineImageTransformer;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -55,7 +58,7 @@ public class RandomBruteForceSpeedLineImageTransformer implements LineImageTrans
 
         ImageMerger imageMerger = new ContinuousAreaImageMerger(0.6, normCalculator);
 
-        List<IndexedLineImage> population = new ArrayList<>();
+        List<LineImage> population = new ArrayList<>();
         population.add(source);
         logProgress(0, population);
         population.addAll(
@@ -69,20 +72,20 @@ public class RandomBruteForceSpeedLineImageTransformer implements LineImageTrans
         logProgress(1, population);
 
         for(int i = 1; i <= iterationCount; i++){
-            List<IndexedLineImage> newPopulation = population.parallelStream()
+            List<LineImage> newPopulation = population.parallelStream()
                     .map(partialLineImageTransformer::transform)
                     .collect(Collectors.toList());
 
-            List<IndexedLineImage> population2 = new ArrayList<>(population);
-//            List<IndexedLineImage> population2 = new ArrayList<>(newPopulation);
+            List<LineImage> population2 = new ArrayList<>(population);
+//            List<LineImage> population2 = new ArrayList<>(newPopulation);
             Collections.shuffle(population2);
 
-            List<IndexedLineImage> mergedPopulation = mergePopulation(
+            List<LineImage> mergedPopulation = mergePopulation(
                     population2.subList(0, population2.size() / 2),
                     population2.subList(population2.size() / 2, population2.size()), imageMerger);
             newPopulation.addAll(mergedPopulation);
 
-            List<IndexedLineImage> reversedPopulation = population.parallelStream()
+            List<LineImage> reversedPopulation = population.parallelStream()
                     .map(reverseLineImageTransformer::transform)
                     .collect(Collectors.toList());
             newPopulation.addAll(reversedPopulation);
@@ -99,12 +102,12 @@ public class RandomBruteForceSpeedLineImageTransformer implements LineImageTrans
         return population.get(0);
     }
 
-    private List<IndexedLineImage> cutPopulation(List<IndexedLineImage> population, List<IndexedLineImage> newPopulation,
-                                                Supplier<IndexedLineImage> supplier){
+    private List<LineImage> cutPopulation(List<LineImage> population, List<LineImage> newPopulation,
+                                                Supplier<LineImage> supplier){
 
         int bestProtectedCount = 1;
         Random random = ThreadLocalRandom.current();
-        List<IndexedLineImage> result =
+        List<LineImage> result =
                 Stream.concat(
                         population.stream()
                             .limit(bestProtectedCount),
@@ -116,7 +119,7 @@ public class RandomBruteForceSpeedLineImageTransformer implements LineImageTrans
                         )
                 )
                 .parallel()
-                 .sorted(Comparator.comparingDouble(IndexedLineImage::getNorm))
+                 .sorted(Comparator.comparingDouble(LineImage::getNorm))
                 .limit(populationSize)
                 .collect(Collectors.toList());
         if(result.size() == populationSize)
@@ -126,7 +129,7 @@ public class RandomBruteForceSpeedLineImageTransformer implements LineImageTrans
                 .collect(Collectors.toList());
     }
 
-    private void logProgress(int gen, List<IndexedLineImage> population){
+    private void logProgress(int gen, List<LineImage> population){
         if(gen % 200 == 0) {
             System.out.println(String.format("Gen: %5s Current best speeds %s, %s, %s, %s, %s" , gen,
                     getNorm(population, 0), getNorm(population, 1),
@@ -143,24 +146,23 @@ public class RandomBruteForceSpeedLineImageTransformer implements LineImageTrans
         }
     }
 
-    private List<IndexedLineImage> mergePopulation(
-            List<IndexedLineImage> population1,
-            List<IndexedLineImage> population2,
+    private List<LineImage> mergePopulation(
+            List<LineImage> population1,
+            List<LineImage> population2,
             ImageMerger imageMerger
     ) {
-        PointIndex pointIndex = population1.get(0).getPointIndex();
-        int lineCount = population1.get(0).getLineCount();
+        int lineCount = population1.get(0).lines.length;
         return IntStream.range(0, population1.size())
                 .parallel()
                 .mapToObj(index -> {
-                    IndexedLineImage lineImage = new IndexedLineImage(pointIndex, lineCount);
+                    LineImage lineImage = new LineImage(lineCount);
                     imageMerger.merge(population1.get(index), population2.get(index), lineImage);
                     return lineImage;
                 })
                 .collect(Collectors.toList());
     }
 
-    private Double getNorm(List<IndexedLineImage> population, int index) {
+    private Double getNorm(List<LineImage> population, int index) {
         if(index < population.size()){
             return population.get(index).getNorm();
         }

@@ -3,28 +3,27 @@ package org.ao.robopaint.transform;
 import org.ao.robopaint.image.Line;
 import org.ao.robopaint.image.LineImage;
 import org.ao.robopaint.norm.NormCalculator;
-import org.ao.robopaint.norm.NormedLineImage;
 
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class SwapLineImageTransformerStrategy implements LineImageTransformerStrategy<NormedLineImage> {
+public class SwapLineImageTransformer implements LineImageTransformer {
     private final double distanceRatio;
     private NormCalculator normCalculator;
 
-    public SwapLineImageTransformerStrategy(double distanceRatio, NormCalculator normCalculator) {
+    public SwapLineImageTransformer(double distanceRatio, NormCalculator normCalculator) {
         this.distanceRatio = distanceRatio;
         this.normCalculator = normCalculator;
     }
 
-    public SwapLineImageTransformerStrategy(NormCalculator normCalculator) {
+    public SwapLineImageTransformer(NormCalculator normCalculator) {
         this.normCalculator = normCalculator;
         distanceRatio = 1;
     }
 
     @Override
-    public void transform(NormedLineImage source, NormedLineImage target) {
-        target.clone(source);
+    public LineImage transform(LineImage source) {
+        LineImage target = new LineImage(source);
         if(source.isNormCalculated()) {
             target.setNorm(source.getNorm());
         }
@@ -53,9 +52,9 @@ public class SwapLineImageTransformerStrategy implements LineImageTransformerStr
         }
         boolean reverse = random.nextBoolean();
         swapAndReverse(target, i1, i2, reverse);
-
+        return target;
     }
-    public void swapAndReverse(NormedLineImage lineImage, int index1, int index2, boolean reverseIndex2) {
+    public void swapAndReverse(LineImage lineImage, int index1, int index2, boolean reverseIndex2) {
         if(index1 != index2) {
             swap(lineImage, index1, index2);
         }
@@ -70,7 +69,7 @@ public class SwapLineImageTransformerStrategy implements LineImageTransformerStr
         }
     }
 
-    public void setLine(NormedLineImage lineImage, Line line, boolean reverse, int index){
+    public void setLine(LineImage lineImage, Line line, boolean reverse, int index){
         double oldLeftNorm = calculateLeftNorm(lineImage, index);
         double oldRightNorm = calculateRightNorm(lineImage, index);
 
@@ -89,7 +88,7 @@ public class SwapLineImageTransformerStrategy implements LineImageTransformerStr
             verifyNorm(lineImage);
         }
     }
-    private void swap(NormedLineImage lineImage, int index1, int index2) {
+    private void swap(LineImage lineImage, int index1, int index2) {
 
 //        verifyNorm(lineImage);
 
@@ -126,7 +125,7 @@ public class SwapLineImageTransformerStrategy implements LineImageTransformerStr
         }
     }
 
-    private void verifyNorm(NormedLineImage lineImage) {
+    private void verifyNorm(LineImage lineImage) {
 //        System.out.println("Norm: " + lineImage.getNorm());
         double recalculatedNorm = normCalculator.calculate(lineImage);
 //        System.out.println("Recalculated norm: " + recalculatedNorm);
@@ -136,11 +135,11 @@ public class SwapLineImageTransformerStrategy implements LineImageTransformerStr
         }
     }
 
-    private double calculateLeftNorm(NormedLineImage lineImage, int index){
+    private double calculateLeftNorm(LineImage lineImage, int index){
         return index > 0 ? normCalculator.calculateNorm(lineImage.lines[index - 1], lineImage.reverse[index - 1],
                 lineImage.lines[index], lineImage.reverse[index]) : 0;
     }
-    private double calculateRightNorm(NormedLineImage lineImage, int index){
+    private double calculateRightNorm(LineImage lineImage, int index){
         return index < lineImage.lines.length - 1 ? normCalculator.calculateNorm(lineImage.lines[index], lineImage.reverse[index],
                 lineImage.lines[index + 1], lineImage.reverse[index + 1]) : 0;
     }

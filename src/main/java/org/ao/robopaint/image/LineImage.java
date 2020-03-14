@@ -18,8 +18,8 @@ public class LineImage {
     }
 
     public LineImage(LineImage lineImage) {
-        this.lines = lineImage.lines;
-        this.reverse = lineImage.reverse;
+        this.lines = lineImage.lines.clone();
+        this.reverse = lineImage.reverse.clone();
         this.norm = lineImage.norm;
         this.normCalculated = lineImage.normCalculated;
     }
@@ -42,5 +42,25 @@ public class LineImage {
 
     public boolean isNormCalculated() {
         return normCalculated;
+    }
+
+    public int getLineStartX(int i){
+        return reverse[i] ? lines[i].x2 : lines[i].x1;
+    }
+
+    public int getLineEndX(int i){
+        return reverse[i] ? lines[i].x1 : lines[i].x2;
+    }
+
+    public int getLineStartY(int i){
+        return reverse[i] ? lines[i].y2 : lines[i].y1;
+    }
+
+    public int getLineEndY(int i){
+        return reverse[i] ? lines[i].y1 : lines[i].y2;
+    }
+
+    public int getLineCount(){
+        return lines.length;
     }
 }

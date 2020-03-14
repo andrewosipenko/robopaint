@@ -1,14 +1,14 @@
 package org.ao.robopaint.transform.indexed;
 
 import org.ao.robopaint.Application;
-import org.ao.robopaint.image.indexed.IndexedLineImage;
-import org.ao.robopaint.image.indexed.PointIndex;
+import org.ao.robopaint.image.Line;
+import org.ao.robopaint.image.LineImage;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 
 public class RandomBruteForceSpeedLineImageTransformerTest {
@@ -21,67 +21,54 @@ public class RandomBruteForceSpeedLineImageTransformerTest {
 
     @Test
     public void testTwoLines() throws IOException {
-        PointIndex pointIndex = createSequentialPointIndex(4);
-        IndexedLineImage source = new IndexedLineImage(pointIndex, 2);
-        source.set(0, 2, 3);
-        source.set(1, 0, 1);
+        LineImage source = new LineImage(
+                new Line(2, 0, 3, 0),
+                new Line(0, 0, 1, 0)
+        );
+
         application.getExportFacade().exportInitial(application.getExportState(), source);
 
-        IndexedLineImage result = application.getLineImageTransformer().transform(source);
+        LineImage result = application.getLineImageTransformer().transform(source);
 
-        application.getExportFacade().exportResult(application.getExportState(), null, result);
-
-        assertEquals( 0, result.getStart(0) );
+        assertEquals( 0, result.lines[0].x1 );
     }
-
     @Test
     public void testTwoLinesWithReverse() throws IOException {
-        PointIndex pointIndex = createSequentialPointIndex(4);
-        IndexedLineImage source = new IndexedLineImage(pointIndex, 2);
-        source.set(0, 3, 2);
-        source.set(1, 0, 1);
+        LineImage source = new LineImage(
+                new Line(3, 0, 2, 0),
+                new Line(0, 0, 1, 0)
+        );
+
         application.getExportFacade().exportInitial(application.getExportState(), source);
 
-        IndexedLineImage result = application.getLineImageTransformer().transform(source);
+        LineImage result = application.getLineImageTransformer().transform(source);
 
-        application.getExportFacade().exportResult(application.getExportState(), null, result);
-
-        assertEquals(0, result.getStart(0));
-        assertEquals(1, result.getEnd(0));
-
-        assertEquals(2, result.getStart(1));
-        assertEquals(3, result.getEnd(1));
+        if (result.lines[0].x1 == 0) {
+            assertEquals(3, result.lines[1].x1);
+            assertTrue(result.reverse[1]);
+        }
+        else if (result.lines[0].x1 == 3){
+            assertEquals(0, result.lines[1].x1);
+            assertTrue(result.reverse[1]);
+        }
+        else {
+            fail();
+        }
     }
-
     @Test
     public void testManyLines() throws IOException {
         int lineCount = 100;
-        PointIndex pointIndex = createSequentialPointIndex(lineCount + 1);
         final int y = 2;
 
-        IndexedLineImage source = new IndexedLineImage(pointIndex, lineCount);
+        Line[] lines = new Line[lineCount];
         for(int i = 0; i < lineCount / 2; i++){
-            source.set(i * 2, i * 2, i * 2 + 1);
-            source.set(i * 2 + 1, lineCount - i * 2 - 1, lineCount - i * 2);
+            lines[i * 2] = new Line(i * 2, y, i * 2 + 1, y);
+            lines[i * 2 + 1] = new Line(lineCount - i * 2 - 1, y, lineCount - i * 2, y);
         }
+        LineImage source = new LineImage(lines);
+
         application.getExportFacade().exportInitial(application.getExportState(), source);
+        LineImage result = application.getLineImageTransformer().transform(source);
 
-        IndexedLineImage result = application.getLineImageTransformer().transform(source);
-
-        application.getExportFacade().exportResult(application.getExportState(), null, result);
-
-        assertEquals(0, result.getStart(0));
-        assertEquals(1, result.getEnd(0));
-
-        assertEquals(2, result.getStart(1));
-        assertEquals(3, result.getEnd(1));
-    }
-
-    private PointIndex createSequentialPointIndex(int count){
-        PointIndex pointIndex = new PointIndex(count);
-        for(int i = 0; i < count; i++) {
-            pointIndex.set(i, i, 0);
-        }
-        return pointIndex;
-    }
-}
+        assertEquals( 0, result.lines[0].x1 );
+    }}

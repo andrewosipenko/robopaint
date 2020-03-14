@@ -2,9 +2,16 @@ package org.ao.robopaint.norm;
 
 import org.ao.robopaint.image.Line;
 import org.ao.robopaint.image.LineImage;
+import org.ao.robopaint.image.Point;
 
 public class SpeedNormCalculator implements NormCalculator {
     private static final double WHITESPACE_TO_LINE_GAP = 5;
+
+    private final Point start;
+
+    public SpeedNormCalculator(Point start) {
+        this.start = start;
+    }
 
     @Override
     public double calculate(LineImage lineImage) {
@@ -18,6 +25,12 @@ public class SpeedNormCalculator implements NormCalculator {
 //        result += calculateNorm(lines[0].x1, lines[0].y1, lines[0].x2, lines[0].y2);
         Line previousLine = lines[0];
         boolean previousReverse = lineImage.reverse[0];
+        if(previousReverse){
+            result = calculateNorm(start.x, start.y, lines[0].x2, lines[0].y2);
+        }
+        else {
+            result = calculateNorm(start.x, start.y, lines[0].x1, lines[0].y1);
+        }
         for (int i = 1; i < lines.length; i++) {
             Line line = lines[i];
             boolean reverse = lineImage.reverse[i];

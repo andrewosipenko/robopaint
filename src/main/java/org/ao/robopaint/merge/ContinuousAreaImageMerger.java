@@ -1,8 +1,8 @@
 package org.ao.robopaint.merge;
 
 import org.ao.robopaint.image.Line;
+import org.ao.robopaint.image.LineImage;
 import org.ao.robopaint.norm.NormCalculator;
-import org.ao.robopaint.norm.NormedLineImage;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -17,19 +17,19 @@ public class ContinuousAreaImageMerger implements ImageMerger {
     }
 
     @Override
-    public void merge(NormedLineImage source1, NormedLineImage source2, NormedLineImage target) {
+    public void merge(LineImage source1, LineImage source2, LineImage target) {
         Random random = ThreadLocalRandom.current();
-        int areaSize = Math.max(2, random.nextInt((int)(ratio * source1.lines.length)));
+        int areaSize = Math.max(1, random.nextInt((int)(ratio * source1.lines.length)));
         int maxStart = source1.lines.length - areaSize;
-        if(maxStart == 0){
-            maxStart = 1;
-        }
-        int start1 = random.nextInt(maxStart);
-        int start2 = random.nextInt(maxStart);
+        int start1 = random.nextInt(maxStart + 1);
+        int start2 = random.nextInt(maxStart + 1);
         mergeInternally(source1, source2, target, areaSize, start1, start2);
         target.setNorm(normCalculator.calculate(target));
+        if(target.lines[0] == target.lines[1]){
+            throw new IllegalStateException();
+        }
     }
-    void mergeInternally(NormedLineImage source1, NormedLineImage source2, NormedLineImage target,
+    void mergeInternally(LineImage source1, LineImage source2, LineImage target,
                                    int areaSize, int start1, int start2) {
         Arrays.fill(target.lines, null);
         Set<Line> mergedLines = new HashSet<>(target.lines.length);

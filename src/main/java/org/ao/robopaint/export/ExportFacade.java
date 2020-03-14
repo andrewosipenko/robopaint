@@ -1,16 +1,14 @@
 package org.ao.robopaint.export;
 
-import org.ao.robopaint.image.indexed.IndexedLineImage;
+import org.ao.robopaint.image.LineImage;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.time.chrono.IsoChronology;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
-import java.time.format.ResolverStyle;
 import java.time.format.SignStyle;
 import java.util.Map;
 
@@ -47,20 +45,20 @@ public class ExportFacade implements AutoCloseable {
         return new ExportState();
     }
 
-    public void exportInitial(ExportState exportState, IndexedLineImage image) throws IOException {
+    public void exportInitial(ExportState exportState, LineImage image) throws IOException {
         exportState.setSourceBaseName("unknown");
         exportInitialInternal(exportState, image);
         reportGenerator.generate(exportState);
     }
 
-    public void exportInitial(ExportState exportState, Path source, IndexedLineImage image) throws IOException {
+    public void exportInitial(ExportState exportState, Path source, LineImage image) throws IOException {
         exportState.setSourceBaseName(source.toFile().getName());
         exportInitialInternal(exportState, image);
         source = Files.copy(source, exportState.getInitialDir());
         exportState.setSource(source);
     }
 
-    private void exportInitialInternal(ExportState exportState, IndexedLineImage image) throws IOException {
+    private void exportInitialInternal(ExportState exportState, LineImage image) throws IOException {
 
 
         Path root = Paths.get("outputs",
@@ -81,7 +79,7 @@ public class ExportFacade implements AutoCloseable {
     }
 
 
-    public void exportDebug(ExportState exportState, IndexedLineImage image, int generation) throws IOException {
+    public void exportDebug(ExportState exportState, LineImage image, int generation) throws IOException {
         debugImageExporters.entrySet().stream().map(
                 entry -> {
                     Path debugRendering = exportState.getDebugDir().resolve(entry.getKey() + "gen_" + generation + "_" + image.getNorm() + ".svg");
@@ -93,7 +91,7 @@ public class ExportFacade implements AutoCloseable {
         reportGenerator.generate(exportState);
     }
 
-    public void exportResult(ExportState exportState, Path result, IndexedLineImage resultImage) throws IOException {
+    public void exportResult(ExportState exportState, Path result, LineImage resultImage) throws IOException {
         Path resultDir = exportState.getRootDir().resolve("3_result");
         Files.createDirectory(resultDir);
         final String resultBaseName;

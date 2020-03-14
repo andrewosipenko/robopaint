@@ -1,6 +1,7 @@
 package org.ao.robopaint;
 
 import org.ao.robopaint.export.*;
+import org.ao.robopaint.transform.LineImageTransformer;
 import org.ao.robopaint.transform.indexed.RandomBruteForceSpeedLineImageTransformer;
 
 import java.io.IOException;

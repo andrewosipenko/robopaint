@@ -69,9 +69,9 @@ public class SpeedNormCalculator implements NormCalculator {
             lineStartY = line.y1;
         }
         double result = calculateNorm(previousLineEndX, previousLineEndY, lineStartX, lineStartY);
-        if (previousLineEndX != lineStartX || previousLineEndY != lineStartY){
-            result += WHITESPACE_TO_LINE_GAP;
-        }
+//        if (previousLineEndX != lineStartX || previousLineEndY != lineStartY){
+//            result += WHITESPACE_TO_LINE_GAP;
+//        }
         return result;
     }
 }

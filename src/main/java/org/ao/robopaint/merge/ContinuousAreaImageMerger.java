@@ -37,31 +37,19 @@ public class ContinuousAreaImageMerger implements ImageMerger {
             mergedLines.add(target.lines[start2 + i] = source1.lines[start1 + i]);
             target.reverse[start2 + i] = source1.reverse[start1 + i];
         }
-        List<Line> skippedLines = new ArrayList<>();
-        List<Boolean> skippedReverse = new ArrayList<>();
-        for(int i = 0; i < areaSize; i++){
-            Line line = source2.lines[start2 + i];
-            if(!mergedLines.contains(line)){
-                skippedLines.add(line);
-                skippedReverse.add(source2.reverse[start2 + i]);
-            }
-        }
-        Iterator<Line> lineIterator = skippedLines.iterator();
-        Iterator<Boolean> reverseIterator = skippedReverse.iterator();
-        for(int i = 0; i < target.lines.length; i++) {
-            if(target.lines[i] == null) {
-                if (mergedLines.contains(source2.lines[i])){
-                    target.lines[i] = lineIterator.next();
-                    target.reverse[i] = reverseIterator.next();
+        int length = target.lines.length;
+        for(int targetIndex = 0, sourceIndex = 0; sourceIndex < length && targetIndex < length; ) {
+            if(target.lines[targetIndex] == null) {
+                if (!mergedLines.contains(source2.lines[sourceIndex])){
+                    target.lines[targetIndex] = source2.lines[sourceIndex];
+                    target.reverse[targetIndex] = source2.reverse[sourceIndex];
+                    targetIndex++;
                 }
-                else {
-                    target.lines[i] = source2.lines[i];
-                    target.reverse[i] = source2.reverse[i];
-                }
+                sourceIndex++;
             }
-        }
-        if(lineIterator.hasNext()) {
-            throw new IllegalArgumentException("One line was not processed still");
+            else {
+                targetIndex++;
+            }
         }
     }
 }

@@ -25,14 +25,11 @@ public class ContinuousAreaImageMerger implements ImageMerger {
         int start2 = random.nextInt(maxStart + 1);
         mergeInternally(source1, source2, target, areaSize, start1, start2);
         target.setNorm(normCalculator.calculate(target));
-        if(target.lines[0] == target.lines[1]){
-            throw new IllegalStateException();
-        }
     }
     void mergeInternally(LineImage source1, LineImage source2, LineImage target,
                                    int areaSize, int start1, int start2) {
         Arrays.fill(target.lines, null);
-        Set<Line> mergedLines = new HashSet<>(target.lines.length);
+        Set<Line> mergedLines = new HashSet<>(areaSize);
         for(int i = 0; i < areaSize; i++){
             mergedLines.add(target.lines[start2 + i] = source1.lines[start1 + i]);
             target.reverse[start2 + i] = source1.reverse[start1 + i];

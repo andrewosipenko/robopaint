@@ -58,10 +58,10 @@ public class RandomBruteForceSpeedLineImageTransformerTest {
     @Test
     public void testManyLines() throws IOException {
         int lineCount = 100;
-        final int y = 2;
 
         Line[] lines = new Line[lineCount];
         for(int i = 0; i < lineCount / 2; i++){
+            int y = i % 2;
             lines[i * 2] = new Line(i * 2, y, i * 2 + 1, y);
             lines[i * 2 + 1] = new Line(lineCount - i * 2 - 1, y, lineCount - i * 2, y);
         }
@@ -71,4 +71,6 @@ public class RandomBruteForceSpeedLineImageTransformerTest {
         LineImage result = application.getLineImageTransformer().transform(source);
 
         assertEquals( 0, result.lines[0].x1 );
+        assertEquals( 1, result.lines[1].x1 );
+        assertEquals( 2, result.lines[2].x1 );
     }}

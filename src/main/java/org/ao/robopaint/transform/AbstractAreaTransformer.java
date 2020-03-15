@@ -1,4 +1,4 @@
-package org.ao.robopaint.transform.indexed;
+package org.ao.robopaint.transform;
 
 import org.ao.robopaint.image.LineImage;
 import org.ao.robopaint.norm.NormCalculator;

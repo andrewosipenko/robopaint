@@ -14,6 +14,10 @@ public class ReverseLineImageTransformer extends AbstractAreaTransformer {
         int area = getArea(source);
         int start = getStart(source, area);
 
+        return transformInternally(source, area, start);
+    }
+
+    protected LineImage transformInternally(LineImage source, int area, int start) {
         LineImage target = new LineImage(source);
         int end = start + area - 1;
         for(int i = 0; i <= end - start; i++) {

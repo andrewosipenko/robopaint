@@ -28,7 +28,6 @@ public class ContinuousAreaImageMerger implements ImageMerger {
     }
     void mergeInternally(LineImage source1, LineImage source2, LineImage target,
                                    int areaSize, int start1, int start2) {
-        Arrays.fill(target.lines, null);
         Set<Line> mergedLines = new HashSet<>(areaSize);
         for(int i = 0; i < areaSize; i++){
             mergedLines.add(target.lines[start2 + i] = source1.lines[start1 + i]);

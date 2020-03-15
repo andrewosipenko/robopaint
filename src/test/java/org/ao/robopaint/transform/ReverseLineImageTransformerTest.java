@@ -30,4 +30,15 @@ public class ReverseLineImageTransformerTest {
         assertEquals(line1, result.lines[1]);
         assertTrue(result.reverse[1]);
     }
+
+    @Test
+    public void shouldTransformFirstThree() {
+        LineImage result = transformer.transformInternally(new LineImage(line1, line2, line3), 3, 0);
+        assertEquals(line3, result.lines[0]);
+        assertTrue(result.reverse[0]);
+        assertEquals(line2, result.lines[1]);
+        assertTrue(result.reverse[1]);
+        assertEquals(line1, result.lines[2]);
+        assertTrue(result.reverse[0]);
+    }
 }

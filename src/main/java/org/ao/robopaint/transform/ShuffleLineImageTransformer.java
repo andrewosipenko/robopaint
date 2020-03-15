@@ -49,7 +49,7 @@ public class ShuffleLineImageTransformer implements LineImageTransformer {
             array1[index] = array1[i];
             array1[i] = a;
 
-            array2[i] = random.nextBoolean();
+//            array2[i] = random.nextBoolean();
         }
     }
 }

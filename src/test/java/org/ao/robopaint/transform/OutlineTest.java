@@ -21,17 +21,6 @@ public class OutlineTest extends TestCase
         application = new Application(4, 600, 600);
     }
 
-    public void testOutlineNoLineMerge() throws URISyntaxException, IOException {
-        LineImage lineImage = new GCodeLineImageReader().read(getClassPathResource("outline.gcode"));
-        LineImage indexedLineImage = lineImage;
-
-        application.getExportFacade().exportInitial(application.getExportState(), indexedLineImage);
-
-//        LineImage result = application.getLineImageTransformer().transform(indexedLineImage);
-//
-//        application.getExportFacade().exportResult(application.getExportState(), null, result);
-    }
-
     public void testOutlineLineMerge() throws URISyntaxException, IOException {
         LineImage source = new GCodeLineImageReader().read(getClassPathResource("outline.gcode"));
         ReversableLineImageTransformer simplifyTransform = new SimplifyLineImageTransformer();

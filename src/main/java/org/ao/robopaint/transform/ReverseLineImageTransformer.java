@@ -21,7 +21,7 @@ public class ReverseLineImageTransformer extends AbstractAreaTransformer {
         LineImage target = new LineImage(source);
         int end = start + area - 1;
         for(int i = 0; i <= end - start; i++) {
-            target.reverse[i + start] = !target.reverse[i + start];
+            target.reverse[i + start] = !source.reverse[end - i];
             target.lines[i + start] = source.lines[end - i];
         }
 

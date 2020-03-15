@@ -56,7 +56,7 @@ public class RandomBruteForceSpeedLineImageTransformer implements LineImageTrans
         LineImageTransformer swapLineImageTransformer = new SwapLineImageTransformer(transformerDistanceRatio, normCalculator);
         LineImageTransformer reverseLineImageTransformer = new ReverseLineImageTransformer(0.6, normCalculator);
 
-        ImageMerger imageMerger = new ContinuousAreaImageMerger(0.6, normCalculator);
+        ImageMerger imageMerger = new ContinuousAreaImageMerger(0.01, normCalculator);
 
         List<LineImage> population = new ArrayList<>();
         population.add(source);

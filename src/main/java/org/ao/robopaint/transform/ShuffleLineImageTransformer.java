@@ -34,9 +34,6 @@ public class ShuffleLineImageTransformer implements LineImageTransformer {
             shuffle(target.lines, start, start + shuffleBatchSize - 1);
         }
         target.setNorm(normCalculator.calculate(target));
-        if(target.lines[0] == target.lines[1]){
-            throw new IllegalStateException();
-        }
         return target;
     }
 

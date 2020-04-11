@@ -13,6 +13,6 @@ public class RainbowColorer implements Colorer {
 
     @Override
     public String getColor(int lineIndex, int totalLineCount) {
-        return colors[(int) (lineIndex  * colors.length / totalLineCount)];
+        return colors[lineIndex  * colors.length / totalLineCount];
     }
 }

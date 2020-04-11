@@ -14,12 +14,14 @@ public class SvgImageExporter implements LineImageExporter {
     private final int height;
     private final Colorer lineColorer;
     private final Colorer emptyMoveColorer;
+    private boolean emptyMoveOpacity;
 
-    public SvgImageExporter(int width, int height, Colorer lineColorer, Colorer emptyMoveColorer) {
+    public SvgImageExporter(int width, int height, Colorer lineColorer, Colorer emptyMoveColorer, boolean emptyMoveOpacity) {
         this.width = width;
         this.height = height;
         this.lineColorer = lineColorer;
         this.emptyMoveColorer = emptyMoveColorer;
+        this.emptyMoveOpacity = emptyMoveOpacity;
     }
 
     @Override
@@ -60,7 +62,7 @@ public class SvgImageExporter implements LineImageExporter {
 
             String emptyColor = emptyMoveColorer.getColor(i, lineImage.getLineCount());
             if ((Math.abs(previousLine.x2 - line.x1) > 2 || Math.abs(previousLine.y2 - line.y2) > 2)) {
-                exportLine(new Line(previousLine.x2, previousLine.y2, line.x1, line.y1), emptyColor, false, writer);
+                exportLine(new Line(previousLine.x2, previousLine.y2, line.x1, line.y1), emptyColor, emptyMoveOpacity, writer);
             }
 
             color = lineColorer.getColor(i, lineImage.getLineCount());
@@ -86,7 +88,7 @@ public class SvgImageExporter implements LineImageExporter {
             writer.append(colorHex);
             writer.append(";stroke-width:1\"");
             if(!opacity){
-                writer.append(" opacity=\"0.3\"");
+                writer.append(" opacity=\"0.6\"");
             }
             writer.append("/>\n");
         }

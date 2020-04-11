@@ -10,8 +10,9 @@ import java.io.Writer;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 public class ReportGenerator {
     private static Logger log = Logger.getLogger(ReportGenerator.class.getName());
@@ -19,16 +20,19 @@ public class ReportGenerator {
     private final int scale;
     private final int width;
     private final int height;
+    private final String transform;
 
     private Template template;
 
-    public ReportGenerator(int scale, int width, int height) throws IOException {
+    public ReportGenerator(int scale, int width, int height, String transform) throws IOException {
         this.scale = scale;
         this.width = width;
         this.height = height;
+        this.transform = transform;
 
         Configuration configuration = new Configuration(Configuration.VERSION_2_3_27);
         configuration.setClassForTemplateLoading(this.getClass(), "/");
+        configuration.setNumberFormat("0.######");
         template = configuration.getTemplate("report.ftl");
     }
 
@@ -44,15 +48,14 @@ public class ReportGenerator {
         result.setSourceBaseName(exportState.getSourceBaseName());
         result.setSourceRendering(rootDir.relativize(exportState.getSourceRendering()));
 
-        result.getDebug().addAll(
-            exportState.getDebug().stream()
-                .map(debugState ->
-                    new ExportState.DebugState(debugState.getGeneration(),
-                            rootDir.relativize(debugState.getPath()),
-                            debugState.getRendering())
-                )
-            .collect(Collectors.toList())
-        );
+        StreamSupport.stream(exportState.getDebug().spliterator(), false)
+            .map(debugState ->
+                new ExportState.DebugState(debugState.getGeneration(),
+                        rootDir.relativize(debugState.getPath()),
+                        debugState.getRendering(),
+                        debugState.getNorm())
+            )
+            .forEach(result::addDebug);
 
         if(exportState.getResultRendering() != null) {
             result.setResultRendering(rootDir.relativize(exportState.getResultRendering()));
@@ -68,6 +71,7 @@ public class ReportGenerator {
                 model.put("exportState", exportState);
                 model.put("width", scale * width);
                 model.put("height", scale * height);
+                model.put("transform", transform != null ? transform : "");
 
                 template.process(model, writer);
             } catch (TemplateException e) {

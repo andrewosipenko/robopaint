@@ -16,7 +16,7 @@ public class RandomBruteForceSpeedLineImageTransformerTest {
 
     @Before
     public void setUp() throws Exception {
-        application = new Application(4, 100, 4);
+        application = new Application(4, 100, 4, null);
     }
 
     @Test

@@ -18,15 +18,16 @@ public class Application {
     private LineImageTransformer lineImageTransformer;
 
 
-    public Application(int scale, int width, int height) throws IOException {
+    public Application(int scale, int width, int height, String transform) throws IOException {
         lineColorer = new FixedColorer("#000000");
-        reportGenerator = new ReportGenerator(4, width, height);
+        reportGenerator = new ReportGenerator(scale, width, height, transform);
+        Colorer rainbowColorer = new RainbowColorer();
         exportFacade = new ExportFacade(
-                new SvgImageExporter(width, height, lineColorer,  Colorer.NOOP_COLORER),
+                new SvgImageExporter(width, height, lineColorer,  Colorer.NOOP_COLORER, true),
                 Map.of(
-                        Rendering.MOVE, new SvgImageExporter(width, height, lineColorer,  new FixedColorer("#00FF00")),
-                        Rendering.GRADIENT, new SvgImageExporter(width, height, lineColorer, new GradientColorer()),
-                        Rendering.RAINBOW, new SvgImageExporter(width, height, lineColorer, new RainbowColorer())
+                        Rendering.MOVE, new SvgImageExporter(width, height, lineColorer,  new FixedColorer("#00FF00"), false),
+                        Rendering.GRADIENT, new SvgImageExporter(width, height, new NoOpColorer(), new GradientColorer(), true),
+                        Rendering.RAINBOW, new SvgImageExporter(width, height, rainbowColorer, rainbowColorer, true)
                 ),
                 reportGenerator
         );

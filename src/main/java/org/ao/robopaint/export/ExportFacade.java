@@ -1,5 +1,6 @@
 package org.ao.robopaint.export;
 
+import org.ao.robopaint.image.Line;
 import org.ao.robopaint.image.LineImage;
 
 import java.io.IOException;
@@ -54,13 +55,11 @@ public class ExportFacade implements AutoCloseable {
     public void exportInitial(ExportState exportState, Path source, LineImage image) throws IOException {
         exportState.setSourceBaseName(source.toFile().getName());
         exportInitialInternal(exportState, image);
-        source = Files.copy(source, exportState.getInitialDir());
+        source = Files.copy(source, exportState.getInitialDir().resolve(source.getFileName()));
         exportState.setSource(source);
     }
 
     private void exportInitialInternal(ExportState exportState, LineImage image) throws IOException {
-
-
         Path root = Paths.get("outputs",
                 "output_" + exportState.getSourceBaseName() + "_" + EXPORT_DIR_SUFFIX_FORMAT.format(LocalDateTime.now())
         );
@@ -69,6 +68,7 @@ public class ExportFacade implements AutoCloseable {
 
         Path initial = root.resolve("1_initial");
         Files.createDirectory(initial);
+        exportState.setInitialDir(initial);
         Path sourceRendering = initial.resolve(exportState.getSourceBaseName() + ".svg");
         imageExporter.export(image, sourceRendering);
         exportState.setSourceRendering(sourceRendering);
@@ -78,15 +78,14 @@ public class ExportFacade implements AutoCloseable {
         exportState.setDebugDir(debug);
     }
 
-
     public void exportDebug(ExportState exportState, LineImage image, int generation) throws IOException {
         debugImageExporters.entrySet().stream().map(
                 entry -> {
                     Path debugRendering = exportState.getDebugDir().resolve(entry.getKey() + "gen_" + generation + "_" + image.getNorm() + ".svg");
                     entry.getValue().export(image, debugRendering);
-                    return new ExportState.DebugState(generation, debugRendering, entry.getKey());
+                    return new ExportState.DebugState(generation, debugRendering, entry.getKey(), image.getNorm());
                 }
-        ).forEach(exportState.getDebug()::add);
+        ).forEach(exportState::addDebug);
 
         reportGenerator.generate(exportState);
     }

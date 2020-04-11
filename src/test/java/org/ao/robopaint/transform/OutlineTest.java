@@ -18,15 +18,17 @@ public class OutlineTest extends TestCase
 
     @Before
     public void setUp() throws Exception {
-        application = new Application(4, 600, 600);
+        application = new Application(1, 600, 600,
+                "transform: translate(60px, 0px) scale(1.3) rotateX(180deg)");
     }
 
     public void testOutlineLineMerge() throws URISyntaxException, IOException {
-        LineImage source = new GCodeLineImageReader().read(getClassPathResource("outline.gcode"));
+        Path sourcePath = getClassPathResource("outline.gcode");
+        LineImage source = new GCodeLineImageReader().read(sourcePath);
         ReversableLineImageTransformer simplifyTransform = new SimplifyLineImageTransformer();
         LineImage simpleImage = simplifyTransform.transform(source);
         LineImage indexedLineImage = simpleImage;
-        application.getExportFacade().exportInitial(application.getExportState(), indexedLineImage);
+        application.getExportFacade().exportInitial(application.getExportState(), sourcePath, source);
 
         LineImage indexedLineImageResult = application.getLineImageTransformer().transform(indexedLineImage);
 //        LineImage result = simplifyTransform.reverse(simpleResult);

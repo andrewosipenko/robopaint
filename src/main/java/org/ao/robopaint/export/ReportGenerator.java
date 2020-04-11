@@ -11,7 +11,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 public class ReportGenerator {
     private static Logger log = Logger.getLogger(ReportGenerator.class.getName());
@@ -29,6 +29,7 @@ public class ReportGenerator {
 
         Configuration configuration = new Configuration(Configuration.VERSION_2_3_27);
         configuration.setClassForTemplateLoading(this.getClass(), "/");
+        configuration.setNumberFormat("0.######");
         template = configuration.getTemplate("report.ftl");
     }
 
@@ -44,15 +45,14 @@ public class ReportGenerator {
         result.setSourceBaseName(exportState.getSourceBaseName());
         result.setSourceRendering(rootDir.relativize(exportState.getSourceRendering()));
 
-        result.getDebug().addAll(
-            exportState.getDebug().stream()
-                .map(debugState ->
-                    new ExportState.DebugState(debugState.getGeneration(),
-                            rootDir.relativize(debugState.getPath()),
-                            debugState.getRendering())
-                )
-            .collect(Collectors.toList())
-        );
+        StreamSupport.stream(exportState.getDebug().spliterator(), false)
+            .map(debugState ->
+                new ExportState.DebugState(debugState.getGeneration(),
+                        rootDir.relativize(debugState.getPath()),
+                        debugState.getRendering(),
+                        debugState.getNorm())
+            )
+            .forEach(result::addDebug);
 
         if(exportState.getResultRendering() != null) {
             result.setResultRendering(rootDir.relativize(exportState.getResultRendering()));

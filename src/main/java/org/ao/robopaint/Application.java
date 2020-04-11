@@ -20,7 +20,7 @@ public class Application {
 
     public Application(int scale, int width, int height) throws IOException {
         lineColorer = new FixedColorer("#000000");
-        reportGenerator = new ReportGenerator(4, width, height);
+        reportGenerator = new ReportGenerator(scale, width, height);
         exportFacade = new ExportFacade(
                 new SvgImageExporter(width, height, lineColorer,  Colorer.NOOP_COLORER),
                 Map.of(

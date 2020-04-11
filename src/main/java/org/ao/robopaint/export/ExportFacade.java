@@ -7,10 +7,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.time.chrono.IsoChronology;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
-import java.time.format.ResolverStyle;
 import java.time.format.SignStyle;
 import java.util.Map;
 
@@ -56,13 +54,11 @@ public class ExportFacade implements AutoCloseable {
     public void exportInitial(ExportState exportState, Path source, IndexedLineImage image) throws IOException {
         exportState.setSourceBaseName(source.toFile().getName());
         exportInitialInternal(exportState, image);
-        source = Files.copy(source, exportState.getInitialDir());
+        source = Files.copy(source, exportState.getInitialDir().resolve(source.getFileName()));
         exportState.setSource(source);
     }
 
     private void exportInitialInternal(ExportState exportState, IndexedLineImage image) throws IOException {
-
-
         Path root = Paths.get("outputs",
                 "output_" + exportState.getSourceBaseName() + "_" + EXPORT_DIR_SUFFIX_FORMAT.format(LocalDateTime.now())
         );
@@ -72,6 +68,7 @@ public class ExportFacade implements AutoCloseable {
         Path initial = root.resolve("1_initial");
         Files.createDirectory(initial);
         Path sourceRendering = initial.resolve(exportState.getSourceBaseName() + ".svg");
+        exportState.setInitialDir(initial);
         imageExporter.export(image, sourceRendering);
         exportState.setSourceRendering(sourceRendering);
 
@@ -86,9 +83,9 @@ public class ExportFacade implements AutoCloseable {
                 entry -> {
                     Path debugRendering = exportState.getDebugDir().resolve(entry.getKey() + "gen_" + generation + "_" + image.getNorm() + ".svg");
                     entry.getValue().export(image, debugRendering);
-                    return new ExportState.DebugState(generation, debugRendering, entry.getKey());
+                    return new ExportState.DebugState(generation, debugRendering, entry.getKey(), image.getNorm());
                 }
-        ).forEach(exportState.getDebug()::add);
+        ).forEach(exportState::addDebug);
 
         reportGenerator.generate(exportState);
     }

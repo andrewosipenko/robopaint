@@ -1,10 +1,13 @@
 package org.ao.robopaint.export;
 
+import org.ao.robopaint.image.Line;
+
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class ExportState {
+    private static final int DEBUG_GENERATION_STEP_NOT_DEFINED = -1;
     private Path rootDir;
     private Path initialDir;
     private Path debugDir;
@@ -15,9 +18,13 @@ public class ExportState {
     private Path sourceRendering;
 
     private final List<DebugState> debug = new ArrayList<>();
+    private int maxDebugGeneration = 0;
+    private int debugGenerationStep = DEBUG_GENERATION_STEP_NOT_DEFINED;
 
     private Path result;
     private Path resultRendering;
+
+    private Line boundingBox;
 
     public ExportState() {
     }
@@ -26,11 +33,13 @@ public class ExportState {
         private final int generation;
         private final Path path;
         private final Rendering rendering;
+        private final double norm;
 
-        public DebugState(int generation, Path path, Rendering rendering) {
+        public DebugState(int generation, Path path, Rendering rendering, double norm) {
             this.generation = generation;
             this.path = path;
             this.rendering = rendering;
+            this.norm = norm;
         }
 
         public int getGeneration() {
@@ -43,6 +52,10 @@ public class ExportState {
 
         public Rendering getRendering() {
             return rendering;
+        }
+
+        public double getNorm() {
+            return norm;
         }
     }
 
@@ -62,8 +75,18 @@ public class ExportState {
         this.sourceRendering = sourceRendering;
     }
 
-    public List<DebugState> getDebug() {
+    public Iterable<DebugState> getDebug() {
         return debug;
+    }
+
+    public void addDebug(DebugState debugState){
+        debug.add(debugState);
+        if(debugState.generation > maxDebugGeneration) {
+            maxDebugGeneration = debugState.generation;
+        }
+        if(debugGenerationStep == DEBUG_GENERATION_STEP_NOT_DEFINED && debugState.generation > 0) {
+            debugGenerationStep = debugState.generation;
+        }
     }
 
     public Path getResult() {
@@ -120,6 +143,21 @@ public class ExportState {
 
     public void setSourceBaseName(String sourceBaseName) {
         this.sourceBaseName = sourceBaseName;
+    }
+
+    public Collection<Rendering> getRenderings(){
+        return debug.stream().map(DebugState::getRendering).collect(Collectors.toSet());
+    }
+    public int getMaxGeneration(){
+        return maxDebugGeneration;
+    }
+
+    public int getGenerationStep(){
+        return debugGenerationStep == DEBUG_GENERATION_STEP_NOT_DEFINED ? 1 : debugGenerationStep;
+    }
+
+    public void setBoundingBox(Line boundingBox) {
+        this.boundingBox = boundingBox;
     }
 }
 

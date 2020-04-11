@@ -3,8 +3,8 @@ package org.ao.robopaint.image;
 import org.ao.robopaint.image.indexed.IndexedLineImage;
 import org.ao.robopaint.image.indexed.PointIndex;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.stream.IntStream;
 
 public class ImageConverter {

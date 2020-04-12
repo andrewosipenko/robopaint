@@ -2,6 +2,12 @@
   <head>
     <title>${exportState.sourceBaseName} report</title>
     <style>
+      figure {
+        width: 450px;
+        height: 450px;
+        margin: 0;
+        overflow: hidden;
+      }
       img {
         width: ${width}px;
         height: ${height}px;
@@ -18,11 +24,15 @@
   <body>
     <div class="source">
       <h2>Source</h2>
-      <img src="${exportState.sourceRendering}"/>
+      <figure>
+        <img src="${exportState.sourceRendering}"/>
+      </figure>
     </div>
     <div class="result">
       <h2>Result</h2>
-      <img src="${exportState.resultRendering!''}"/>
+      <figure>
+        <img src="${exportState.resultRendering!''}"/>
+      </figure>
     </div>
     <div class="debug">
       <h2>Debug</h2>
@@ -30,7 +40,9 @@
         <#list exportState.renderings as rendering>
           <div class="rendering">
             <h3>${rendering}</h3>
-            <img id="image-rendering-${rendering}">
+            <figure>
+              <img id="image-rendering-${rendering}">
+            </figure>
           </div>
         </#list>
       </div>

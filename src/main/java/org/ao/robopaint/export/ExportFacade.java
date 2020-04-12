@@ -1,6 +1,5 @@
 package org.ao.robopaint.export;
 
-import org.ao.robopaint.image.Line;
 import org.ao.robopaint.image.LineImage;
 
 import java.io.IOException;
@@ -95,7 +94,7 @@ public class ExportFacade implements AutoCloseable {
         Files.createDirectory(resultDir);
         final String resultBaseName;
         if (result != null) {
-            Files.copy(result, resultDir);
+            Files.copy(result, resultDir.resolve(result.getFileName()));
             resultBaseName = result.toFile().getName();
         }
         else {

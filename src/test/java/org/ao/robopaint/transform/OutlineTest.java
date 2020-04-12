@@ -2,8 +2,8 @@ package org.ao.robopaint.transform;
 
 import junit.framework.TestCase;
 import org.ao.robopaint.Application;
-import org.ao.robopaint.export.LineImageExporter;
 import org.ao.robopaint.gcode.GCodeLineImageReader;
+import org.ao.robopaint.gcode.GCodeLineImageWriter;
 import org.ao.robopaint.image.LineImage;
 import org.junit.Before;
 
@@ -19,7 +19,7 @@ public class OutlineTest extends TestCase
     @Before
     public void setUp() throws Exception {
         application = new Application(1, 600, 600,
-                "transform: translate(60px, 0px) scale(1.3) rotateX(180deg)");
+                "transform: translate(60px, 0px) scale(1.2) rotateX(180deg)");
     }
 
     public void testOutlineLineMerge() throws URISyntaxException, IOException {
@@ -31,14 +31,11 @@ public class OutlineTest extends TestCase
         application.getExportFacade().exportInitial(application.getExportState(), sourcePath, source);
 
         LineImage indexedLineImageResult = application.getLineImageTransformer().transform(indexedLineImage);
-//        LineImage result = simplifyTransform.reverse(simpleResult);
+        LineImage resultImage = simplifyTransform.reverse(indexedLineImageResult);
+        Path result = Path.of("outline-result.gcode");
+        new GCodeLineImageWriter().write(resultImage, result);
 
-        application.getExportFacade().exportResult(application.getExportState(), null, indexedLineImageResult);
-
-//        LineImageExporter lineImageExporter = new SvgRainbowImageExporter(Paths.get("gcode-result"), 600, 600, 2, false);
-//        lineImageExporter.export(result, "outline-result.svg");
-//        new GCodeLineImageWriter().write(result, Path.of("outline-result.gcode"));
-
+        application.getExportFacade().exportResult(application.getExportState(), result, resultImage);
     }
 
     public void testAgSpiralM0LineMerge() throws URISyntaxException, IOException {

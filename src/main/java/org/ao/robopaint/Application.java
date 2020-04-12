@@ -25,7 +25,7 @@ public class Application {
         exportFacade = new ExportFacade(
                 new SvgImageExporter(width, height, lineColorer,  Colorer.NOOP_COLORER, true),
                 Map.of(
-                        Rendering.MOVE, new SvgImageExporter(width, height, lineColorer,  new FixedColorer("#00FF00"), false),
+                        Rendering.MOVE, new SvgImageExporter(width, height, lineColorer,  new FixedColorer("#7CFC00"), false),
                         Rendering.GRADIENT, new SvgImageExporter(width, height, new NoOpColorer(), new GradientColorer(), true),
                         Rendering.RAINBOW, new SvgImageExporter(width, height, rainbowColorer, rainbowColorer, true)
                 ),

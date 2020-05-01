@@ -1,5 +1,6 @@
 package org.ao.robopaint.transform.indexed;
 
+import org.ao.robopaint.AbstractTest;
 import org.ao.robopaint.Application;
 import org.ao.robopaint.image.Line;
 import org.ao.robopaint.image.LineImage;
@@ -11,12 +12,12 @@ import java.io.IOException;
 import static org.junit.Assert.*;
 
 
-public class RandomBruteForceSpeedLineImageTransformerTest {
-    Application application;
+public class RandomBruteForceSpeedLineImageTransformerTest extends AbstractTest {
+    private Application application;
 
     @Before
     public void setUp() throws Exception {
-        application = new Application(4, 100, 4, null);
+        application = new Application(4, 100, 4, null, ITERATION_COUNT);
     }
 
     @Test

@@ -17,8 +17,8 @@ import java.util.regex.Pattern;
 public class GCodeLineImageReader implements LineImageReader {
     private static Logger log = Logger.getLogger(GCodeLineImageReader.class.getName());
 
-    private static final String PEN_DOWN_Z = "Z-1";
-    private static final Pattern PATTERN = Pattern.compile("G01\\sX(\\d+)\\sY(\\d+)\\sZ\\-1");
+    private static final String PEN_DOWN_Z = "-1";
+    private static final Pattern PATTERN = Pattern.compile("G\\d+\\s*(?:X(-?\\d+))?\\s*(?:Y(-?\\d+))?\\s*(?:Z(-?\\d+))?");
 
     @Override
     public LineImage read(Path path) throws IOException {
@@ -28,23 +28,36 @@ public class GCodeLineImageReader implements LineImageReader {
             BufferedReader bufferedReader = new BufferedReader(fileReader)
         ){
             String line;
-            boolean prevPointDefined = false;
+            boolean prevPenIsDown = false;
             int prevX = Integer.MIN_VALUE;
             int prevY = Integer.MIN_VALUE;
             while ((line = bufferedReader.readLine()) != null){
                 Matcher matcher = PATTERN.matcher(line);
                 if(matcher.matches()){
-                    int x = Integer.parseInt(matcher.group(1));
-                    int y = Integer.parseInt(matcher.group(2));
-                    if (prevPointDefined) {
+                    String xString = matcher.group(1);
+                    int x = prevX;
+                    if(xString != null) {
+                        x = Integer.parseInt(xString);
+                    }
+
+                    String yString = matcher.group(2);
+                    int y = prevY;
+                    if(yString != null) {
+                        y = Integer.parseInt(yString);
+                    }
+
+                    boolean penIsDown = prevPenIsDown;
+                    String zString = matcher.group(3);
+                    if(zString != null) {
+                        penIsDown = PEN_DOWN_Z.equals(zString);
+                    }
+                    if (prevPenIsDown && penIsDown && (x != prevX || y != prevY)) {
                         lines.add(new Line(prevX, prevY, x, y));
                     }
+
                     prevX = x;
                     prevY = y;
-                    prevPointDefined = true;
-                }
-                else {
-                    prevPointDefined = false;
+                    prevPenIsDown = penIsDown;
                 }
             }
         }

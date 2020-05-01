@@ -1,53 +1,36 @@
 package org.ao.robopaint.transform;
 
 import junit.framework.TestCase;
+import org.ao.robopaint.AbstractTest;
 import org.ao.robopaint.Application;
-import org.ao.robopaint.gcode.GCodeLineImageReader;
-import org.ao.robopaint.gcode.GCodeLineImageWriter;
-import org.ao.robopaint.image.LineImage;
 import org.junit.Before;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class OutlineTest extends TestCase
-{
-    Application application;
+public class OutlineTest extends AbstractTest {
+    private Application application;
 
     @Before
     public void setUp() throws Exception {
         application = new Application(1, 600, 600,
-                "transform: translate(60px, 0px) scale(1.2) rotateX(180deg)");
+                "transform: translate(60px, 0px) scale(1.2) rotateX(180deg)", ITERATION_COUNT);
     }
 
+    @Test
     public void testOutlineLineMerge() throws URISyntaxException, IOException {
-        Path sourcePath = getClassPathResource("outline.gcode");
-        LineImage source = new GCodeLineImageReader().read(sourcePath);
-        ReversableLineImageTransformer simplifyTransform = new SimplifyLineImageTransformer();
-        LineImage simpleImage = simplifyTransform.transform(source);
-        LineImage indexedLineImage = simpleImage;
-        application.getExportFacade().exportInitial(application.getExportState(), sourcePath, source);
+        Path source = getClassPathResource("outline.gcode");
 
-        LineImage indexedLineImageResult = application.getLineImageTransformer().transform(indexedLineImage);
-        LineImage resultImage = simplifyTransform.reverse(indexedLineImageResult);
-        Path result = Path.of("outline-result.gcode");
-        new GCodeLineImageWriter().write(resultImage, result);
-
-        application.getExportFacade().exportResult(application.getExportState(), result, resultImage);
+        application.getgCodeOptimizer().execute(source);
     }
 
+    @Test
     public void testAgSpiralM0LineMerge() throws URISyntaxException, IOException {
-        LineImage source = new GCodeLineImageReader().read(getClassPathResource("AgSpiralM0.gcode"));
-        ReversableLineImageTransformer simplifyTransform = new SimplifyLineImageTransformer();
-        LineImage simpleImage = simplifyTransform.transform(source);
-        LineImage simpleResult = application.getLineImageTransformer().transform(simpleImage);
-        LineImage result = simplifyTransform.reverse(simpleResult);
-
-//        LineImageExporter lineImageExporter = new SvgRainbowImageExporter(Paths.get("gcode-result"), 600, 600, 2, false);
-//        lineImageExporter.export(result, "outline-result.svg");
-//        new GCodeLineImageWriter().write(result, Path.of("outline-result.gcode"));
+        Path source = getClassPathResource("AgSpiralM0.gcode");
+        application.getgCodeOptimizer().execute(source);
     }
 
     private Path getClassPathResource(String resource) throws URISyntaxException {

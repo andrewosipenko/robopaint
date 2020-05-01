@@ -16,9 +16,10 @@ public class Application {
     private ExportFacade exportFacade;
     private ExportState exportState;
     private LineImageTransformer lineImageTransformer;
+    private GCodeOptimizer gCodeOptimizer;
 
 
-    public Application(int scale, int width, int height, String transform) throws IOException {
+    public Application(int scale, int width, int height, String transform, int iterationCount) throws IOException {
         lineColorer = new FixedColorer("#000000");
         reportGenerator = new ReportGenerator(scale, width, height, transform);
         Colorer rainbowColorer = new RainbowColorer();
@@ -32,19 +33,8 @@ public class Application {
                 reportGenerator
         );
         exportState = exportFacade.createState();
-        lineImageTransformer = new RandomBruteForceSpeedLineImageTransformer(1000, 20000, width, height, 0.1, 5, exportFacade, exportState);
-    }
-
-    public int getScale() {
-        return scale;
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
+        lineImageTransformer = new RandomBruteForceSpeedLineImageTransformer(1000, iterationCount, width, height, 0.1, 5, exportFacade, exportState);
+        gCodeOptimizer = new GCodeOptimizer(exportFacade, exportState, lineImageTransformer);
     }
 
     public Colorer getLineColorer() {
@@ -65,5 +55,9 @@ public class Application {
 
     public LineImageTransformer getLineImageTransformer() {
         return lineImageTransformer;
+    }
+
+    public GCodeOptimizer getgCodeOptimizer() {
+        return gCodeOptimizer;
     }
 }

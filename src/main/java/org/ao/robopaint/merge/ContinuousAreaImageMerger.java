@@ -19,7 +19,7 @@ public class ContinuousAreaImageMerger implements ImageMerger {
     @Override
     public void merge(LineImage source1, LineImage source2, LineImage target) {
         Random random = ThreadLocalRandom.current();
-        int areaSize = Math.max(1, random.nextInt((int)(ratio * source1.lines.length)));
+        int areaSize = Math.max(1, random.nextInt(Math.max(1, (int)(ratio * source1.lines.length))));
         int maxStart = source1.lines.length - areaSize;
         int start1 = random.nextInt(maxStart + 1);
         int start2 = random.nextInt(maxStart + 1);

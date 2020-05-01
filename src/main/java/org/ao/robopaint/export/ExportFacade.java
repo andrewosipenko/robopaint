@@ -24,6 +24,7 @@ public class ExportFacade implements AutoCloseable {
             .appendValue(HOUR_OF_DAY, 2)
             .appendValue(MINUTE_OF_HOUR, 2)
             .appendValue(SECOND_OF_MINUTE, 2)
+            .appendValue(MILLI_OF_SECOND)
             .parseStrict()
             .toFormatter();
 

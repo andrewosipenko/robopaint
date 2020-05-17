@@ -1,0 +1,240 @@
+<html>
+  <head>
+    <title>outline.gcode report</title>
+    <style>
+      figure {
+        width: 450px;
+        height: 450px;
+        margin: 0;
+        overflow: hidden;
+      }
+      img {
+        width: 600px;
+        height: 600px;
+        transform: translate(60px, 0px) scale(1.2) rotateX(180deg);
+      }
+      .source, .result, .rendering {
+        float: left;
+      }
+      .debug, debug-view {
+        clear: both;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="source">
+      <h2>Source</h2>
+      <figure>
+        <img src="1_initial\outline.gcode.svg"/>
+      </figure>
+    </div>
+    <div class="result">
+      <h2>Result</h2>
+      <figure>
+        <img src="3_result\outline-result.gcode.svg"/>
+      </figure>
+    </div>
+    <div class="debug">
+      <h2>Debug</h2>
+      <div class="debug-view">
+          <div class="rendering">
+            <h3>MOVE</h3>
+            <figure>
+              <img id="image-rendering-MOVE">
+            </figure>
+          </div>
+          <div class="rendering">
+            <h3>RAINBOW</h3>
+            <figure>
+              <img id="image-rendering-RAINBOW">
+            </figure>
+          </div>
+          <div class="rendering">
+            <h3>GRADIENT</h3>
+            <figure>
+              <img id="image-rendering-GRADIENT">
+            </figure>
+          </div>
+      </div>
+      <div style="clear:both"/>
+      <div class="debug-control">
+        <label for="gen">Generation:</label>
+        <input name="gen" id="gen" type="range" value="0"
+               min="0" max="50000"
+               step="1000"
+               onchange="updateDebugView(this.value)"/>
+      </div>
+      <script>
+        var debugImages = [
+            {src:"2_debug\\RAINBOWgen_0_24423.91544114377.svg", gen:0, rendering:"RAINBOW", norm:24423.915441},
+            {src:"2_debug\\GRADIENTgen_0_24423.91544114377.svg", gen:0, rendering:"GRADIENT", norm:24423.915441},
+            {src:"2_debug\\MOVEgen_0_24423.91544114377.svg", gen:0, rendering:"MOVE", norm:24423.915441},
+            {src:"2_debug\\RAINBOWgen_1000_11398.165917765427.svg", gen:1000, rendering:"RAINBOW", norm:11398.165918},
+            {src:"2_debug\\GRADIENTgen_1000_11398.165917765427.svg", gen:1000, rendering:"GRADIENT", norm:11398.165918},
+            {src:"2_debug\\MOVEgen_1000_11398.165917765427.svg", gen:1000, rendering:"MOVE", norm:11398.165918},
+            {src:"2_debug\\RAINBOWgen_2000_8757.130757927313.svg", gen:2000, rendering:"RAINBOW", norm:8757.130758},
+            {src:"2_debug\\GRADIENTgen_2000_8757.130757927313.svg", gen:2000, rendering:"GRADIENT", norm:8757.130758},
+            {src:"2_debug\\MOVEgen_2000_8757.130757927313.svg", gen:2000, rendering:"MOVE", norm:8757.130758},
+            {src:"2_debug\\RAINBOWgen_3000_7331.511623826804.svg", gen:3000, rendering:"RAINBOW", norm:7331.511624},
+            {src:"2_debug\\GRADIENTgen_3000_7331.511623826804.svg", gen:3000, rendering:"GRADIENT", norm:7331.511624},
+            {src:"2_debug\\MOVEgen_3000_7331.511623826804.svg", gen:3000, rendering:"MOVE", norm:7331.511624},
+            {src:"2_debug\\RAINBOWgen_4000_6409.632871399238.svg", gen:4000, rendering:"RAINBOW", norm:6409.632871},
+            {src:"2_debug\\GRADIENTgen_4000_6409.632871399238.svg", gen:4000, rendering:"GRADIENT", norm:6409.632871},
+            {src:"2_debug\\MOVEgen_4000_6409.632871399238.svg", gen:4000, rendering:"MOVE", norm:6409.632871},
+            {src:"2_debug\\RAINBOWgen_5000_5746.623810451029.svg", gen:5000, rendering:"RAINBOW", norm:5746.62381},
+            {src:"2_debug\\GRADIENTgen_5000_5746.623810451029.svg", gen:5000, rendering:"GRADIENT", norm:5746.62381},
+            {src:"2_debug\\MOVEgen_5000_5746.623810451029.svg", gen:5000, rendering:"MOVE", norm:5746.62381},
+            {src:"2_debug\\RAINBOWgen_6000_5286.454935896721.svg", gen:6000, rendering:"RAINBOW", norm:5286.454936},
+            {src:"2_debug\\GRADIENTgen_6000_5286.454935896721.svg", gen:6000, rendering:"GRADIENT", norm:5286.454936},
+            {src:"2_debug\\MOVEgen_6000_5286.454935896721.svg", gen:6000, rendering:"MOVE", norm:5286.454936},
+            {src:"2_debug\\RAINBOWgen_7000_4931.865066182576.svg", gen:7000, rendering:"RAINBOW", norm:4931.865066},
+            {src:"2_debug\\GRADIENTgen_7000_4931.865066182576.svg", gen:7000, rendering:"GRADIENT", norm:4931.865066},
+            {src:"2_debug\\MOVEgen_7000_4931.865066182576.svg", gen:7000, rendering:"MOVE", norm:4931.865066},
+            {src:"2_debug\\RAINBOWgen_8000_4656.309062898825.svg", gen:8000, rendering:"RAINBOW", norm:4656.309063},
+            {src:"2_debug\\GRADIENTgen_8000_4656.309062898825.svg", gen:8000, rendering:"GRADIENT", norm:4656.309063},
+            {src:"2_debug\\MOVEgen_8000_4656.309062898825.svg", gen:8000, rendering:"MOVE", norm:4656.309063},
+            {src:"2_debug\\RAINBOWgen_9000_4453.121308845106.svg", gen:9000, rendering:"RAINBOW", norm:4453.121309},
+            {src:"2_debug\\GRADIENTgen_9000_4453.121308845106.svg", gen:9000, rendering:"GRADIENT", norm:4453.121309},
+            {src:"2_debug\\MOVEgen_9000_4453.121308845106.svg", gen:9000, rendering:"MOVE", norm:4453.121309},
+            {src:"2_debug\\RAINBOWgen_10000_4273.321240702781.svg", gen:10000, rendering:"RAINBOW", norm:4273.321241},
+            {src:"2_debug\\GRADIENTgen_10000_4273.321240702781.svg", gen:10000, rendering:"GRADIENT", norm:4273.321241},
+            {src:"2_debug\\MOVEgen_10000_4273.321240702781.svg", gen:10000, rendering:"MOVE", norm:4273.321241},
+            {src:"2_debug\\RAINBOWgen_11000_4114.632534826127.svg", gen:11000, rendering:"RAINBOW", norm:4114.632535},
+            {src:"2_debug\\GRADIENTgen_11000_4114.632534826127.svg", gen:11000, rendering:"GRADIENT", norm:4114.632535},
+            {src:"2_debug\\MOVEgen_11000_4114.632534826127.svg", gen:11000, rendering:"MOVE", norm:4114.632535},
+            {src:"2_debug\\RAINBOWgen_12000_3985.3993813013763.svg", gen:12000, rendering:"RAINBOW", norm:3985.399381},
+            {src:"2_debug\\GRADIENTgen_12000_3985.3993813013763.svg", gen:12000, rendering:"GRADIENT", norm:3985.399381},
+            {src:"2_debug\\MOVEgen_12000_3985.3993813013763.svg", gen:12000, rendering:"MOVE", norm:3985.399381},
+            {src:"2_debug\\RAINBOWgen_13000_3872.0335969293005.svg", gen:13000, rendering:"RAINBOW", norm:3872.033597},
+            {src:"2_debug\\GRADIENTgen_13000_3872.0335969293005.svg", gen:13000, rendering:"GRADIENT", norm:3872.033597},
+            {src:"2_debug\\MOVEgen_13000_3872.0335969293005.svg", gen:13000, rendering:"MOVE", norm:3872.033597},
+            {src:"2_debug\\RAINBOWgen_14000_3777.9591018988745.svg", gen:14000, rendering:"RAINBOW", norm:3777.959102},
+            {src:"2_debug\\GRADIENTgen_14000_3777.9591018988745.svg", gen:14000, rendering:"GRADIENT", norm:3777.959102},
+            {src:"2_debug\\MOVEgen_14000_3777.9591018988745.svg", gen:14000, rendering:"MOVE", norm:3777.959102},
+            {src:"2_debug\\RAINBOWgen_15000_3689.769816039421.svg", gen:15000, rendering:"RAINBOW", norm:3689.769816},
+            {src:"2_debug\\GRADIENTgen_15000_3689.769816039421.svg", gen:15000, rendering:"GRADIENT", norm:3689.769816},
+            {src:"2_debug\\MOVEgen_15000_3689.769816039421.svg", gen:15000, rendering:"MOVE", norm:3689.769816},
+            {src:"2_debug\\RAINBOWgen_16000_3623.540333712283.svg", gen:16000, rendering:"RAINBOW", norm:3623.540334},
+            {src:"2_debug\\GRADIENTgen_16000_3623.540333712283.svg", gen:16000, rendering:"GRADIENT", norm:3623.540334},
+            {src:"2_debug\\MOVEgen_16000_3623.540333712283.svg", gen:16000, rendering:"MOVE", norm:3623.540334},
+            {src:"2_debug\\RAINBOWgen_17000_3568.455411144287.svg", gen:17000, rendering:"RAINBOW", norm:3568.455411},
+            {src:"2_debug\\GRADIENTgen_17000_3568.455411144287.svg", gen:17000, rendering:"GRADIENT", norm:3568.455411},
+            {src:"2_debug\\MOVEgen_17000_3568.455411144287.svg", gen:17000, rendering:"MOVE", norm:3568.455411},
+            {src:"2_debug\\RAINBOWgen_18000_3525.982386933481.svg", gen:18000, rendering:"RAINBOW", norm:3525.982387},
+            {src:"2_debug\\GRADIENTgen_18000_3525.982386933481.svg", gen:18000, rendering:"GRADIENT", norm:3525.982387},
+            {src:"2_debug\\MOVEgen_18000_3525.982386933481.svg", gen:18000, rendering:"MOVE", norm:3525.982387},
+            {src:"2_debug\\RAINBOWgen_19000_3479.0438186358115.svg", gen:19000, rendering:"RAINBOW", norm:3479.043819},
+            {src:"2_debug\\GRADIENTgen_19000_3479.0438186358115.svg", gen:19000, rendering:"GRADIENT", norm:3479.043819},
+            {src:"2_debug\\MOVEgen_19000_3479.0438186358115.svg", gen:19000, rendering:"MOVE", norm:3479.043819},
+            {src:"2_debug\\RAINBOWgen_20000_3450.0169174443586.svg", gen:20000, rendering:"RAINBOW", norm:3450.016917},
+            {src:"2_debug\\GRADIENTgen_20000_3450.0169174443586.svg", gen:20000, rendering:"GRADIENT", norm:3450.016917},
+            {src:"2_debug\\MOVEgen_20000_3450.0169174443586.svg", gen:20000, rendering:"MOVE", norm:3450.016917},
+            {src:"2_debug\\RAINBOWgen_21000_3426.8340213774313.svg", gen:21000, rendering:"RAINBOW", norm:3426.834021},
+            {src:"2_debug\\GRADIENTgen_21000_3426.8340213774313.svg", gen:21000, rendering:"GRADIENT", norm:3426.834021},
+            {src:"2_debug\\MOVEgen_21000_3426.8340213774313.svg", gen:21000, rendering:"MOVE", norm:3426.834021},
+            {src:"2_debug\\RAINBOWgen_22000_3407.4818051886386.svg", gen:22000, rendering:"RAINBOW", norm:3407.481805},
+            {src:"2_debug\\GRADIENTgen_22000_3407.4818051886386.svg", gen:22000, rendering:"GRADIENT", norm:3407.481805},
+            {src:"2_debug\\MOVEgen_22000_3407.4818051886386.svg", gen:22000, rendering:"MOVE", norm:3407.481805},
+            {src:"2_debug\\RAINBOWgen_23000_3383.665370973392.svg", gen:23000, rendering:"RAINBOW", norm:3383.665371},
+            {src:"2_debug\\GRADIENTgen_23000_3383.665370973392.svg", gen:23000, rendering:"GRADIENT", norm:3383.665371},
+            {src:"2_debug\\MOVEgen_23000_3383.665370973392.svg", gen:23000, rendering:"MOVE", norm:3383.665371},
+            {src:"2_debug\\RAINBOWgen_24000_3366.1169760016214.svg", gen:24000, rendering:"RAINBOW", norm:3366.116976},
+            {src:"2_debug\\GRADIENTgen_24000_3366.1169760016214.svg", gen:24000, rendering:"GRADIENT", norm:3366.116976},
+            {src:"2_debug\\MOVEgen_24000_3366.1169760016214.svg", gen:24000, rendering:"MOVE", norm:3366.116976},
+            {src:"2_debug\\RAINBOWgen_25000_3354.641944585165.svg", gen:25000, rendering:"RAINBOW", norm:3354.641945},
+            {src:"2_debug\\GRADIENTgen_25000_3354.641944585165.svg", gen:25000, rendering:"GRADIENT", norm:3354.641945},
+            {src:"2_debug\\MOVEgen_25000_3354.641944585165.svg", gen:25000, rendering:"MOVE", norm:3354.641945},
+            {src:"2_debug\\RAINBOWgen_26000_3343.7952348782615.svg", gen:26000, rendering:"RAINBOW", norm:3343.795235},
+            {src:"2_debug\\GRADIENTgen_26000_3343.7952348782615.svg", gen:26000, rendering:"GRADIENT", norm:3343.795235},
+            {src:"2_debug\\MOVEgen_26000_3343.7952348782615.svg", gen:26000, rendering:"MOVE", norm:3343.795235},
+            {src:"2_debug\\RAINBOWgen_27000_3334.9675309687727.svg", gen:27000, rendering:"RAINBOW", norm:3334.967531},
+            {src:"2_debug\\GRADIENTgen_27000_3334.9675309687727.svg", gen:27000, rendering:"GRADIENT", norm:3334.967531},
+            {src:"2_debug\\MOVEgen_27000_3334.9675309687727.svg", gen:27000, rendering:"MOVE", norm:3334.967531},
+            {src:"2_debug\\RAINBOWgen_28000_3331.5185937554215.svg", gen:28000, rendering:"RAINBOW", norm:3331.518594},
+            {src:"2_debug\\GRADIENTgen_28000_3331.5185937554215.svg", gen:28000, rendering:"GRADIENT", norm:3331.518594},
+            {src:"2_debug\\MOVEgen_28000_3331.5185937554215.svg", gen:28000, rendering:"MOVE", norm:3331.518594},
+            {src:"2_debug\\RAINBOWgen_29000_3330.0218283088734.svg", gen:29000, rendering:"RAINBOW", norm:3330.021828},
+            {src:"2_debug\\GRADIENTgen_29000_3330.0218283088734.svg", gen:29000, rendering:"GRADIENT", norm:3330.021828},
+            {src:"2_debug\\MOVEgen_29000_3330.0218283088734.svg", gen:29000, rendering:"MOVE", norm:3330.021828},
+            {src:"2_debug\\RAINBOWgen_30000_3328.6448262520184.svg", gen:30000, rendering:"RAINBOW", norm:3328.644826},
+            {src:"2_debug\\GRADIENTgen_30000_3328.6448262520184.svg", gen:30000, rendering:"GRADIENT", norm:3328.644826},
+            {src:"2_debug\\MOVEgen_30000_3328.6448262520184.svg", gen:30000, rendering:"MOVE", norm:3328.644826},
+            {src:"2_debug\\RAINBOWgen_31000_3328.1093809222707.svg", gen:31000, rendering:"RAINBOW", norm:3328.109381},
+            {src:"2_debug\\GRADIENTgen_31000_3328.1093809222707.svg", gen:31000, rendering:"GRADIENT", norm:3328.109381},
+            {src:"2_debug\\MOVEgen_31000_3328.1093809222707.svg", gen:31000, rendering:"MOVE", norm:3328.109381},
+            {src:"2_debug\\RAINBOWgen_32000_3328.1093809222707.svg", gen:32000, rendering:"RAINBOW", norm:3328.109381},
+            {src:"2_debug\\GRADIENTgen_32000_3328.1093809222707.svg", gen:32000, rendering:"GRADIENT", norm:3328.109381},
+            {src:"2_debug\\MOVEgen_32000_3328.1093809222707.svg", gen:32000, rendering:"MOVE", norm:3328.109381},
+            {src:"2_debug\\RAINBOWgen_33000_3328.1093809222707.svg", gen:33000, rendering:"RAINBOW", norm:3328.109381},
+            {src:"2_debug\\GRADIENTgen_33000_3328.1093809222707.svg", gen:33000, rendering:"GRADIENT", norm:3328.109381},
+            {src:"2_debug\\MOVEgen_33000_3328.1093809222707.svg", gen:33000, rendering:"MOVE", norm:3328.109381},
+            {src:"2_debug\\RAINBOWgen_34000_3328.1093809222707.svg", gen:34000, rendering:"RAINBOW", norm:3328.109381},
+            {src:"2_debug\\GRADIENTgen_34000_3328.1093809222707.svg", gen:34000, rendering:"GRADIENT", norm:3328.109381},
+            {src:"2_debug\\MOVEgen_34000_3328.1093809222707.svg", gen:34000, rendering:"MOVE", norm:3328.109381},
+            {src:"2_debug\\RAINBOWgen_35000_3328.1093809222707.svg", gen:35000, rendering:"RAINBOW", norm:3328.109381},
+            {src:"2_debug\\GRADIENTgen_35000_3328.1093809222707.svg", gen:35000, rendering:"GRADIENT", norm:3328.109381},
+            {src:"2_debug\\MOVEgen_35000_3328.1093809222707.svg", gen:35000, rendering:"MOVE", norm:3328.109381},
+            {src:"2_debug\\RAINBOWgen_36000_3323.7137005608106.svg", gen:36000, rendering:"RAINBOW", norm:3323.713701},
+            {src:"2_debug\\GRADIENTgen_36000_3323.7137005608106.svg", gen:36000, rendering:"GRADIENT", norm:3323.713701},
+            {src:"2_debug\\MOVEgen_36000_3323.7137005608106.svg", gen:36000, rendering:"MOVE", norm:3323.713701},
+            {src:"2_debug\\RAINBOWgen_37000_3323.7137005608106.svg", gen:37000, rendering:"RAINBOW", norm:3323.713701},
+            {src:"2_debug\\GRADIENTgen_37000_3323.7137005608106.svg", gen:37000, rendering:"GRADIENT", norm:3323.713701},
+            {src:"2_debug\\MOVEgen_37000_3323.7137005608106.svg", gen:37000, rendering:"MOVE", norm:3323.713701},
+            {src:"2_debug\\RAINBOWgen_38000_3323.7137005608106.svg", gen:38000, rendering:"RAINBOW", norm:3323.713701},
+            {src:"2_debug\\GRADIENTgen_38000_3323.7137005608106.svg", gen:38000, rendering:"GRADIENT", norm:3323.713701},
+            {src:"2_debug\\MOVEgen_38000_3323.7137005608106.svg", gen:38000, rendering:"MOVE", norm:3323.713701},
+            {src:"2_debug\\RAINBOWgen_39000_3323.7137005608106.svg", gen:39000, rendering:"RAINBOW", norm:3323.713701},
+            {src:"2_debug\\GRADIENTgen_39000_3323.7137005608106.svg", gen:39000, rendering:"GRADIENT", norm:3323.713701},
+            {src:"2_debug\\MOVEgen_39000_3323.7137005608106.svg", gen:39000, rendering:"MOVE", norm:3323.713701},
+            {src:"2_debug\\RAINBOWgen_40000_3323.7137005608106.svg", gen:40000, rendering:"RAINBOW", norm:3323.713701},
+            {src:"2_debug\\GRADIENTgen_40000_3323.7137005608106.svg", gen:40000, rendering:"GRADIENT", norm:3323.713701},
+            {src:"2_debug\\MOVEgen_40000_3323.7137005608106.svg", gen:40000, rendering:"MOVE", norm:3323.713701},
+            {src:"2_debug\\RAINBOWgen_41000_3323.7137005608106.svg", gen:41000, rendering:"RAINBOW", norm:3323.713701},
+            {src:"2_debug\\GRADIENTgen_41000_3323.7137005608106.svg", gen:41000, rendering:"GRADIENT", norm:3323.713701},
+            {src:"2_debug\\MOVEgen_41000_3323.7137005608106.svg", gen:41000, rendering:"MOVE", norm:3323.713701},
+            {src:"2_debug\\RAINBOWgen_42000_3323.7137005608106.svg", gen:42000, rendering:"RAINBOW", norm:3323.713701},
+            {src:"2_debug\\GRADIENTgen_42000_3323.7137005608106.svg", gen:42000, rendering:"GRADIENT", norm:3323.713701},
+            {src:"2_debug\\MOVEgen_42000_3323.7137005608106.svg", gen:42000, rendering:"MOVE", norm:3323.713701},
+            {src:"2_debug\\RAINBOWgen_43000_3323.7137005608106.svg", gen:43000, rendering:"RAINBOW", norm:3323.713701},
+            {src:"2_debug\\GRADIENTgen_43000_3323.7137005608106.svg", gen:43000, rendering:"GRADIENT", norm:3323.713701},
+            {src:"2_debug\\MOVEgen_43000_3323.7137005608106.svg", gen:43000, rendering:"MOVE", norm:3323.713701},
+            {src:"2_debug\\RAINBOWgen_44000_3323.7137005608106.svg", gen:44000, rendering:"RAINBOW", norm:3323.713701},
+            {src:"2_debug\\GRADIENTgen_44000_3323.7137005608106.svg", gen:44000, rendering:"GRADIENT", norm:3323.713701},
+            {src:"2_debug\\MOVEgen_44000_3323.7137005608106.svg", gen:44000, rendering:"MOVE", norm:3323.713701},
+            {src:"2_debug\\RAINBOWgen_45000_3323.7137005608106.svg", gen:45000, rendering:"RAINBOW", norm:3323.713701},
+            {src:"2_debug\\GRADIENTgen_45000_3323.7137005608106.svg", gen:45000, rendering:"GRADIENT", norm:3323.713701},
+            {src:"2_debug\\MOVEgen_45000_3323.7137005608106.svg", gen:45000, rendering:"MOVE", norm:3323.713701},
+            {src:"2_debug\\RAINBOWgen_46000_3323.7137005608106.svg", gen:46000, rendering:"RAINBOW", norm:3323.713701},
+            {src:"2_debug\\GRADIENTgen_46000_3323.7137005608106.svg", gen:46000, rendering:"GRADIENT", norm:3323.713701},
+            {src:"2_debug\\MOVEgen_46000_3323.7137005608106.svg", gen:46000, rendering:"MOVE", norm:3323.713701},
+            {src:"2_debug\\RAINBOWgen_47000_3323.7137005608106.svg", gen:47000, rendering:"RAINBOW", norm:3323.713701},
+            {src:"2_debug\\GRADIENTgen_47000_3323.7137005608106.svg", gen:47000, rendering:"GRADIENT", norm:3323.713701},
+            {src:"2_debug\\MOVEgen_47000_3323.7137005608106.svg", gen:47000, rendering:"MOVE", norm:3323.713701},
+            {src:"2_debug\\RAINBOWgen_48000_3323.7137005608106.svg", gen:48000, rendering:"RAINBOW", norm:3323.713701},
+            {src:"2_debug\\GRADIENTgen_48000_3323.7137005608106.svg", gen:48000, rendering:"GRADIENT", norm:3323.713701},
+            {src:"2_debug\\MOVEgen_48000_3323.7137005608106.svg", gen:48000, rendering:"MOVE", norm:3323.713701},
+            {src:"2_debug\\RAINBOWgen_49000_3323.7137005608106.svg", gen:49000, rendering:"RAINBOW", norm:3323.713701},
+            {src:"2_debug\\GRADIENTgen_49000_3323.7137005608106.svg", gen:49000, rendering:"GRADIENT", norm:3323.713701},
+            {src:"2_debug\\MOVEgen_49000_3323.7137005608106.svg", gen:49000, rendering:"MOVE", norm:3323.713701},
+            {src:"2_debug\\RAINBOWgen_50000_3323.7137005608106.svg", gen:50000, rendering:"RAINBOW", norm:3323.713701},
+            {src:"2_debug\\GRADIENTgen_50000_3323.7137005608106.svg", gen:50000, rendering:"GRADIENT", norm:3323.713701},
+            {src:"2_debug\\MOVEgen_50000_3323.7137005608106.svg", gen:50000, rendering:"MOVE", norm:3323.713701},
+        ];
+        function updateDebugView(gen) {
+            showRendering(gen, "MOVE");
+            showRendering(gen, "RAINBOW");
+            showRendering(gen, "GRADIENT");
+        }
+        function showRendering(gen, rendering){
+          for(const debugImage of debugImages){
+            if(debugImage.gen == gen && debugImage.rendering == rendering) {
+              document.getElementById('image-rendering-' + rendering).src = debugImage.src;
+              return;
+            }
+          }
+        }
+        updateDebugView(document.getElementById('gen').value);
+      </script>
+    </div>
+  </body>
+</html>

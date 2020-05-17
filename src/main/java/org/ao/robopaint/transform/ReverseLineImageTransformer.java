@@ -6,7 +6,7 @@ import org.ao.robopaint.norm.NormCalculator;
 public class ReverseLineImageTransformer extends AbstractAreaTransformer {
 
     public ReverseLineImageTransformer(double ratio, NormCalculator normCalculator) {
-        super(ratio, 1, normCalculator);
+        super(ratio, 1, normCalculator, true);
     }
 
     @Override
